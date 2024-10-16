@@ -1,39 +1,24 @@
-.container {
+.menu {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
 }
 
-body {
-    color: #ffffff;
-    font-family: Arial, sans-serif;
+.card {
+    width: 200px;
+    height: 150px;
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    margin: 10px;
     text-align: center;
-    background-color: hsla(0, 0%, 0%, 0.904);
-    padding: 20px;
+    line-height: 150px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.3s;
 }
 
-.inputdisabled {
-    color: #ffffff;
-    background-color: #f0f0f02c;
-    padding: 5px;
-    width: 200px;
-}
-
-input[type="number"] {
-    width: 200px;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-}
-
-button {
-
-    background-color: #f47a42;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
+.card:hover {
+    background-color: #e0e0e0;
     cursor: pointer;
-
 }

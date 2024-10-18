@@ -5,12 +5,14 @@
   align-items: center;
 }
 
+input {
+  width: 100%; padding: .5em 1em; 
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
-
     color: #ffffff;
-    font-family: Arial, sans-serif;
     text-align: center;
     background-color: hsla(0, 0%, 0%, 0.904);
     padding: 20px;

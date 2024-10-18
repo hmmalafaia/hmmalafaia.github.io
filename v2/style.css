@@ -20,6 +20,9 @@ body {
   
   #glossary {
     margin-top: 20px;
+    height: 800px; /* Adjust height as needed */
+    overflow-y: scroll;
+    /* Add scrollbar styling if desired */
   }
   
   .term {
@@ -31,3 +34,15 @@ body {
   .term h3 {
     margin: 0;
   }
+
+  .fixed-div {
+    
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* Adjust background color and other styles as needed */
+
+  }
+  
+ 

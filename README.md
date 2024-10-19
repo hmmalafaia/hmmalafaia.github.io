@@ -1,1 +1,1 @@
-Projeto pessoal
+Doações via LN? rick@zbd.gg 

@@ -1,7 +1,6 @@
 const searchInput = document.getElementById('search');
 const glossary = document.getElementById('glossary');
 
-// Array de objetos com os termos do glossário (substitua por seus dados)
 const terms = [
     { term: ' 	1.  Altcoin	', definition: '	 Criptomoeda alternativa, criada após o Bitcoin. 	' } ,
     { term: ' 	2.  Ataque de 51%	', definition: '	" Um ataque de 51% pode ser executado contra rede blockchain que utiliza o algoritmo de consenso PoW, no qual uma única entidade ou organização consegue controlar a maioria do hashrate, podendo causar e explorar falhas no sistema. O atacante teria os seguintes poderes	 poder de mineração suficiente para excluir ou modificar a ordem das transações de forma intencional; fazer retroceder transações, o que poderia acarretar um problema de double-spending (gasto duplo); o fraudador pode impedir que algumas ou todas as transações sejam confirmadas (processo conhecido como ataque de negação de serviço) ou impedir que alguns ou todos os mineradores continuem seu trabalho, monopolizando mineração. O atacante não pode	 reverter transações de outros usuários ou impedir que novas transações sejam criadas e transmitidas à rede; criar moedas do nada; mudar a recompensa dos blocos; ou roubar moedas que nunca lhe pertenceram. "	' } ,
@@ -129,13 +128,6 @@ const terms = [
     { term: ' 	124.  xPub	', definition: '	 Significa “Extended Public Key” (chave pública estendida). As chaves xPub são úteis porque o Bitcoin emprega o conceito de saídas de transação não gastas (UTXOs) em endereços de retorno. É a chave que gera todos os endereços, assim, podem-se obter todos os dados da sua carteira, transações anteriores e futuras. Mesmo que signifique "chave pública estendida", esta chave deve permanecer privada e nunca ser compartilhada. 	' } ,
     { term: ' 	125.  Welfare State (Estado de bem-estar social)	', definition: '	" O Estado de bem-estar social, ou Estado-providência, ou Estado social, é um tipo de organização política, econômica e sociocultural que coloca o Estado como agente da promoção social e organizador da economia.					"	' } ,
     
-  
-  
-
-
-
-
-
   // ... adicione mais termos aqui
 ];
 

@@ -20,9 +20,8 @@ body {
   
   #glossary {
     margin-top: 20px;
-    height: 800px; /* Adjust height as needed */
+    height: 800px; 
     overflow-y: scroll;
-    /* Add scrollbar styling if desired */
   }
   
   .term {
@@ -41,8 +40,25 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    /* Adjust background color and other styles as needed */
+
 
   }
-  
- 
+
+  button {
+
+    background-color: #f47a42;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+
+input[type="text"]::placeholder {
+  text-align: center;
+}
+
+input[type="text"] {
+  text-align: center;
+}

@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>rick@zbd.gg</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-1H3QVBPS5S"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-1H3QVBPS5S');   
+
+  </script>
   <link rel="stylesheet" href="styles.css">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <div class="container">
-<a href="https://hmmalafaia.github.io/">
-    <button>Voltar</button>
-  </a><br>
+  <a href="https://hmmalafaia.github.io/">
+      <button>Menu</button>
+  </a>
+  <br>
   <body onload="buscaPreco()">
     <label for="satoshis">SATS:</label>
     <input type="number" id="satoshis" oninput="converter('satoshis')">
@@ -31,7 +40,6 @@
     <br>
     <label for="brlUsd">BRL/USD:</label>
     <input type="number" id="inputUSD" class="inputdisabled">
-
   </body>
   <br>
   <a href="https://linktr.ee/BitcoinerRick" target="_blank">
@@ -45,6 +53,5 @@
     <p>Price supported by coingecko</p>
   </a>
 </div>
-<script src="script.js">   </script>
-
+<script src="script.js"></script>
 </html>

@@ -20,9 +20,6 @@ async function buscaPreco() {
         btcUsd.value = btcUsdValue;
         btcUsd.disabled = true;
 
-
-
-
     } catch (error) {
         console.error('Error fetching Bitcoin price in BRL:', error);
         btcBrl.value = -1;

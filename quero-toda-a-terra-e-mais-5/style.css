@@ -1,0 +1,54 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    color: #ffffff;
+    text-align: center;
+    background-color: hsla(0, 0%, 0%, 0.904);
+    padding: 20px;
+  }
+  
+
+  .fixed-div {
+    
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  
+   .texto-corrido {
+	   text-align: left;
+	   padding: 20px;
+	   margin-left: 480px;
+	   margin-right: 480px;
+		font-kerning: auto;
+    font-family: var(--font_family_body, var(--font_family_body_preset, 'Spectral', serif, var(--font-family-text)));
+    font-weight: var(--font_weight_body_preset, 400);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: antialiased;
+    -webkit-appearance: optimizelegibility;
+    -moz-appearance: optimizelegibility;
+    appearance: optimizelegibility;
+    font-size: calc(var(--font_size_body_desktop, 19px) + var(--font_size_body_offset, 0px));
+    color: var(--color-fg-primary);
+    cursor: default;
+
+  }
+
+  button {
+
+    background-color: #f47a42;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+}

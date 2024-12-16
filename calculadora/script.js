@@ -72,13 +72,13 @@ async function converter(campo) {
 
 
     } else if (campo === 'brl') {
-        bitcoinInput.value = brlInput.value / btcBrl.value;
+        bitcoinInput.value = (brlInput.value / btcBrl.value).toFixed(8);
         satoshisInput.value = (bitcoinInput.value * satoshisPorBitcoin).toFixed(0);
         usdInput.value = (brlInput.value / usd.value).toFixed(2);
 
 
     } else if (campo === 'usd') {
-        bitcoinInput.value = usdInput.value / ((btcBrl.value / usd.value));
+        bitcoinInput.value = (usdInput.value / ((btcBrl.value / usd.value))).toFixed(8);
         satoshisInput.value = (bitcoinInput.value * satoshisPorBitcoin).toFixed(0);
         brlInput.value = (bitcoinInput.value * btcBrl.value).toFixed(2);
     }

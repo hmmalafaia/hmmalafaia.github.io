@@ -26,9 +26,6 @@ body {
    .texto-corrido {
 	   text-align: left;
 	   padding: 20px;
-	   margin-left: 480px;
-	   margin-right: 480px;
-		font-kerning: auto;
     font-family: var(--font_family_body, var(--font_family_body_preset, 'Spectral', serif, var(--font-family-text)));
     font-weight: var(--font_weight_body_preset, 400);
     -webkit-font-smoothing: antialiased;

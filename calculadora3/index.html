@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>rick@zbd.gg - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-1H3QVBPS5S"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-1H3QVBPS5S');
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body onload="buscaPreco()">
+
+  <div class="app-container">
+    
+    <header class="main-header">
+      <a href="https://hmmalafaia.github.io/"><button class="btn-menu">Menu</button></a>
+      <div class="block-height">
+        Block: <span id="blockHeightValue">9999</span>
+      </div>
+    </header>
+
+    <section class="rates-top-bar">
+      <div class="rate-badge">
+        <span class="rate-label">BTC/USD</span>
+        <input type="text" id="btcUsd" class="input-readonly" readonly placeholder="---">
+      </div>
+      <div class="rate-badge">
+        <span class="rate-label">BTC/BRL</span>
+        <input type="text" id="btcBrl" class="input-readonly" readonly placeholder="---">
+      </div>
+      <div class="rate-badge">
+        <span class="rate-label">BRL/USD</span>
+        <input type="text" id="inputUSD" class="input-readonly" readonly placeholder="---">
+      </div>
+    </section>
+
+    <main class="main-content">
+      
+      <section class="calc-box">
+        <div class="calc-column">
+          <div class="input-field">
+            <label for="satoshis">SATS</label>
+            <input type="number" id="satoshis" oninput="converter('satoshis')" placeholder="0">
+          </div>
+          <div class="input-field">
+            <label for="bitcoin">BTC</label>
+            <input type="number" id="bitcoin" oninput="converter('bitcoin')" placeholder="0.00000000">
+          </div>
+        </div>
+        <div class="calc-column">
+          <div class="input-field">
+            <label for="brl">BRL</label>
+            <input type="number" id="brl" oninput="converter('brl')" placeholder="0.00">
+          </div>
+          <div class="input-field">
+            <label for="usd">USD</label>
+            <input type="number" id="usd" oninput="converter('usd')" placeholder="0.00">
+          </div>
+        </div>
+      </section>
+
+      <section class="charts-grid">
+        <div class="chart-wrapper">
+          <span class="chart-title">Diferença (Dia, Sem, Mês, YoY)</span>
+          <div class="canvas-container">
+            <canvas id="chartPriceDiff"></canvas>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <span class="chart-title">Variação Diária (24h)</span>
+          <div class="canvas-container">
+            <canvas id="chartDailyVar"></canvas>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <span class="chart-title">Volume Transacional</span>
+          <div class="canvas-container">
+            <canvas id="chartVolume"></canvas>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="main-footer">
+      <div class="footer-btns">
+        <a href="https://linktr.ee/BitcoinerRick" target="_blank"><button class="btn-secondary">Redes</button></a>
+        <a href="https://catuaba.net/" target="_blank"><button class="btn-secondary">Educação Financeira</button></a>
+      </div>
+      <a href="https://docs.coingecko.com/reference/introduction" target="_blank" class="provider-link">
+        Price by CoinGecko
+      </a>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

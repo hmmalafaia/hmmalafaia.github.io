@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Catálogo de Estabelecimentos</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; background: #f4f4f9; color: #333; }
+        .container { max-width: 1000px; margin: auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+        .card-detalhe { background: #fff; padding: 15px; border-left: 5px solid #007bff; margin-bottom: 15px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h1 { color: #2c3e50; }
+        .btn-voltar { background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <h1 id="title">Nossos Segmentos</h1>
+    <div id="content" class="grid"></div>
+</div>
+
+<script>
+    // Dados extraídos da sua planilha (exemplo baseado na estrutura enviada)
+    const estabelecimentos = [
+        { data: "01/04/2026", nome: "Viva Nawe", segment: "Turismo e Hospedagem", end: "Rua das Flores, 10, Centro, Rio de Janeiro" },
+        { data: "05/04/2026", nome: "Pico Aventura", segment: "Turismo e Aventura", end: "Estrada do Pico, 500, Alto, Petrópolis" },
+        { data: "10/04/2026", nome: "Tech Solutions", segment: "Serviços", end: "Av. Principal, 100, Sala 2, Rio de Janeiro" },
+        { data: "12/04/2026", nome: "Pet Mania", segment: "Petshop", end: "Rua do Cão, 45, Bairro Novo, Duque de Caxias" }
+        // Adicione aqui as outras linhas da sua planilha seguindo o mesmo padrão
+    ];
+
+    const contentDiv = document.getElementById('content');
+    const title = document.getElementById('title');
+
+    function renderSegments() {
+        title.innerText = "Escolha um Segmento";
+        contentDiv.innerHTML = "";
+        const segments = [...new Set(estabelecimentos.map(i => i.segment))];
+        
+        segments.forEach(seg => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `<h3>${seg}</h3><p>Clique para ver estabelecimentos</p>`;
+            card.onclick = () => renderCategory(seg);
+            contentDiv.appendChild(card);
+        });
+    }
+
+    function renderCategory(segment) {
+        title.innerText = segment;
+        contentDiv.innerHTML = `<button class="btn-voltar" onclick="renderSegments()">← Voltar</button><div id="list"></div>`;
+        const listDiv = document.getElementById('list');
+        
+        const filtered = estabelecimentos.filter(i => i.segment === segment);
+        filtered.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card-detalhe';
+            card.innerHTML = `
+                <strong>${item.nome}</strong><br>
+                <small>Cadastrado desde: ${item.data}</small><br>
+                <p style="margin-top:5px; font-size: 0.9em;">📍 ${item.end}</p>
+            `;
+            listDiv.appendChild(card);
+        });
+    }
+
+    renderSegments();
+</script>
+</body>
+</html>

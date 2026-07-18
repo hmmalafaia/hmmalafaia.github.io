@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Rota do Bitcoin - Guia Completo</title>
+    <style>
+        :root { --bitcoin: #f7931a; --success: #28a745; --info: #17a2b8; }
+        html { scroll-behavior: smooth; }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; margin: 0; }
+        .container { max-width: 900px; margin: auto; }
+        
+        /* Cabeçalho e Controles */
+        .controls { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; text-align: center; gap: 15px; }
+        .action-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        
+        /* Botões Principais */
+        .btn-customize { background: white; color: var(--bitcoin); border: 2px solid var(--bitcoin); padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 15px; }
+        .btn-customize.active { background: var(--bitcoin); color: white; }
+        
+        .btn-save { background: white; color: var(--success); border: 2px solid var(--success); padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 15px; display: none; }
+        .btn-save:hover { background: var(--success); color: white; }
+        
+        .btn-routes { background: white; color: var(--info); border: 2px solid var(--info); padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 15px; }
+        .btn-routes:hover { background: var(--info); color: white; }
+        
+        .btn-pdf { 
+            position: fixed; bottom: 30px; right: 30px; z-index: 9900;
+            background: #d9534f; color: white; padding: 15px 25px; 
+            border: none; border-radius: 50px; cursor: pointer; font-weight: bold; 
+            font-size: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: 0.3s; 
+        }
+        .btn-pdf:hover { background: #c9302c; transform: scale(1.05); }
+        
+        /* Busca */
+        .search-container { margin-bottom: 20px; display: flex; justify-content: center; width: 100%; }
+        .search-input { width: 100%; max-width: 600px; padding: 12px 20px; border-radius: 25px; border: 1px solid #ccc; font-size: 1em; outline: none; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .search-input:focus { border-color: var(--bitcoin); box-shadow: 0 0 8px rgba(247,147,26,0.3); }
+        
+        /* Filtros */
+        .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center; }
+        button.filter-btn { padding: 8px 15px; border-radius: 20px; border: 1px solid var(--bitcoin); background: white; cursor: pointer; transition: 0.2s; }
+        button.filter-btn.active, button.filter-btn:hover { background: var(--bitcoin); color: white; }
+        
+        /* Grid e Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; scroll-margin-top: 20px; }
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 4px solid var(--bitcoin); transition: 0.2s; position: relative; }
+        .card a { color: var(--bitcoin); text-decoration: none; font-weight: bold; }
+        .card a:hover { text-decoration: underline; }
+        
+        /* Estrutura do Header do Card */
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+        .tag { font-size: 0.75em; color: var(--bitcoin); font-weight: bold; text-transform: uppercase; }
+        
+        /* Estilos Modo Personalizado */
+        body.customize-mode .card { cursor: pointer; }
+        body.customize-mode .card:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+        
+        .checkbox { width: 22px; height: 22px; border: 2px solid #ccc; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: transparent; font-weight: bold; font-size: 14px; transition: 0.2s; }
+        
+        /* Card Selecionado */
+        .card.selected { border-color: var(--success); background-color: #f4fff6; border-top: 4px solid var(--success); }
+        .card.selected .checkbox { background-color: var(--success); border-color: var(--success); color: white; }
+        .card.selected .tag { color: var(--success); }
+        
+        h3 { margin: 0 0 10px 0; color: #333; }
+        p { font-size: 0.9em; margin: 5px 0; color: #555; }
+        
+        /* Modal de Roteiros */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: #555; font-weight: bold; line-height: 1; }
+        .route-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .route-item:last-child { border-bottom: none; }
+        .route-info strong { display: block; font-size: 1.1em; color: #333; }
+        .route-info small { color: #777; }
+        .route-actions button { margin-left: 5px; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-load { background: var(--success); color: white; }
+        .btn-delete { background: #d9534f; color: white; }
+
+        /* Responsivo Celular */
+        @media (max-width: 768px) {
+            .btn-pdf { bottom: 20px; right: 20px; padding: 12px 18px; font-size: 14px; }
+            .route-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .route-actions { width: 100%; display: flex; justify-content: space-between; }
+        }
+
+        /* Oculta controles na impressão do PDF */
+        @media print {
+            .controls, .filters, .search-container, .btn-pdf, .modal-overlay { display: none !important; }
+            body { background: white; padding: 0; }
+            .grid { display: block; }
+            .card { break-inside: avoid; border: 1px solid #ccc; margin-bottom: 10px; box-shadow: none; border-top: 4px solid #555 !important; background: white !important; }
+            .checkbox { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="controls">
+        <h1 style="margin:0;">📍 A Rota do Bitcoin</h1>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nome, endereço, @ ou categoria...">
+        </div>
+        <div class="action-buttons">
+            <button class="btn-customize" id="btnCustomize" onclick="toggleCustomize()">🛠 Personalizar Rota</button>
+            <button class="btn-save" id="btnSaveRoute" onclick="saveRoute()">💾 Salvar Roteiro</button>
+            <button class="btn-routes" onclick="openRoutesModal()">📂 Meus Roteiros</button>
+        </div>
+    </div>
+    
+    <button class="btn-pdf" id="btnPdf" onclick="handlePrint()">📥 Gerar PDF do Guia</button>
+
+    <div class="filters" id="filters"></div>
+    <div class="grid" id="grid"></div>
+</div>
+
+<!-- Modal Meus Roteiros -->
+<div id="routesModal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeRoutesModal()">&times;</span>
+        <h2 style="margin-top:0; border-bottom: 2px solid #eee; padding-bottom: 10px;">Meus Roteiros Salvos</h2>
+        <div id="savedRoutesList"></div>
+    </div>
+</div>
+
+<script>
+    // Dados estruturados
+    const rawData = [
+        { "nome": "Viva Nawe", "categoria": "Turismo e Hospedagem", "end": "Rua das Hortensias, s/n. Bairro Paiol Grande. São Bento do Sapucai, Sp. Cep: 12490-000", "insta": "@viva.nawe" },
+        { "nome": "Pico Agudo Sports", "categoria": "Turismo e Aventura", "end": "Av. Ministro Nelson HUngria-512", "insta": "picoagudosports" },
+        { "nome": "Pico Agudo Store", "categoria": "Comércio e Varejo", "end": "Av. Ministro Nelson Hungria, s/n, Bairro Centro, Santo Antonio do Pinhal, Sp", "insta": "Não tem" },
+        { "nome": "Artti Pet - Estética animal", "categoria": "Petshop", "end": "Avenida Ministro Nelson Hungria, 203 - Centro", "insta": "Não possui" },
+        { "nome": "Espaço HR", "categoria": "Saúde e Bem-Estar", "end": "Rua Coronel Sebastião Marcondes da Silva 655 centro santo Antônio do pinhal 12450000", "insta": "@hr.espaco" },
+        { "nome": "Hotel fazenda Fonte das Hortênsias", "categoria": "Turismo e Hospedagem", "end": "Francisca dos santos silva , sn", "insta": "Não informado" },
+        { "nome": "Moises Chaves", "categoria": "Turismo e Aventura", "end": "Estrada do Lajeado 17", "insta": "Não" },
+        { "nome": "Tabacaria Pico", "categoria": "Comércio e Varejo", "end": "Av. Ministro Nelson Hungria- 512 loja 3, Bairro Centro, Santo Antônio do Pinhal, SP", "insta": "tabacaria pico" },
+        { "nome": "Eletroposto Verdee", "categoria": "Serviços", "end": "Av. Ministro Nelson Hungria, 686, Bairro Centro", "insta": "Não informado" },
+        { "nome": "A nossa casinha", "categoria": "Turismo e Hospedagem", "end": "Rua Eduardo Levi, 372, Bairro Capivari", "insta": "@nossacasinhacjo" },
+        { "nome": "Lopes paisagismo e jardinagem", "categoria": "Serviços", "end": "Pedro Joaquim lopes, s/n, Bairro Lageado", "insta": "https://maps.app.goo.gl/RnoTsexrxDFPcB4B8" },
+        { "nome": "Matinal Doceria", "categoria": "Alimentação", "end": "Avenida ministro Nelson Hungria, 426, Centro. Cep: 124500000", "insta": "Instagram, Facebook" },
+        { "nome": "Pousada Pinhalense", "categoria": "Turismo e Hospedagem", "end": "Rua Mário Machado, 335, Bairro Centro, Santo Antônio do Pinhal, Sp", "insta": "Não tem" },
+        { "nome": "Venda Cambraia", "categoria": "Comércio e Varejo", "end": "Av. Ministro Nelson Hungria, 460, Bairro Centro, Santo Antônio do Pinhal, SP, Cep: 12450000", "insta": "Não tem" },
+        { "nome": "Intervisão vistorias", "categoria": "Serviços Automotivos", "end": "R Maria Jacinto de Faria, 162, Bairro Centro", "insta": "taplink.cc/vistoriaintervisao" },
+        { "nome": "Hortifrutigranjeirodoferreirinha", "categoria": "Comércio e Varejo", "end": "Av ministro Nelson Hungria, 109, Bairro Centro", "insta": "@QuitandadoFerreirinha" },
+        { "nome": "Pousada Cesar", "categoria": "Turismo e Hospedagem", "end": "Das Orquídeas, 230, Bairro Res. Vale das Flores, Santo Antônio do Pinhal, Sp, Cep: 12450-000", "insta": "www.pousadacesar.com.br" },
+        { "nome": "A NOSSA CASINHA NO BOSQUE", "categoria": "Turismo e Hospedagem", "end": "Avenida Mariane Baumgart, 1841, Bairro jardim alpestre, Campos do Jordão, Sp", "insta": "Não tem" },
+        { "nome": "Farmácia manipharm santo Antônio", "categoria": "Saúde e Bem-Estar", "end": "Av ministro Nelson hungria, 615, Bairro Centro, Santo Antônio do Pinhal, Sp", "insta": "@farmácia.manipharm" },
+        { "nome": "Hospedagem tapovan", "categoria": "Turismo e Hospedagem", "end": "Rodovia benedito gomes de souza, 4140. Bairro Paiol Grande. Santo Antônio do Pinhal, SP. Cep: 12490-000", "insta": "" },
+        { "nome": "Bolinho de Bacalhau e Cia", "categoria": "Alimentação e Bebidas", "end": "Estação ferroviária Eugênio Lefévre, 001, Bairro Eugênio Lefévre, Santo Antônio do Pinhal, Sp", "insta": "@bolinho.bacalhau" },
+        { "nome": "Manoel jardinagem", "categoria": "Serviços Domésticos e Manutenção", "end": "Geraldo ferreira de lima, 33, Bairro Joaquim Alves, Santo Antônio do Pinhal", "insta": "Não" },
+        { "nome": "Start estética automotiva", "categoria": "Estética Automotiva", "end": "Avenida Ministro Nelson Hungria, 906. Bairro Centro. Santo Antônio do Pinhal, SP. Cep: 12450-000", "insta": "@start_estetica_automotiva" },
+        { "nome": "Samba &Gol", "categoria": "Alimentação e Bebidas", "end": "Estádio Maurício Nader, S/n. Bairro Centro. Santo Antônio do Pinhal, Sp. Cep: 12450000", "insta": "https://www.instagram.com/samba_e_gol/profilecard/?igsh=MXgxZmhzaW4yZzlqZw==" },
+        { "nome": "BS", "categoria": "Eventos e Cultura", "end": "Rua Gumercindo Jacintho da Silva, 31 Loja 3, Bairro Centro, Santo Antônio do Pinhal, Sp", "insta": "@bs23hub" },
+        { "nome": "Mega segurança e informatica", "categoria": "Tecnologia e Segurança", "end": "Av ministro nelson hungria, 624, Bairro Centro, Santo Antônio do pinhal", "insta": "Megasegurinfo@gmail.com" },
+        { "nome": "Pousada Jardim Suspenso", "categoria": "Turismo e Hospedagem", "end": "Rod. Oswaldo Barbosa Guizard, 5500, Rio Preto, Santo Antônio do Pinhal, SP, Cep: 12450-000", "insta": "www.spamusical.com" },
+        { "nome": "Santo Antônio Futebol Clube", "categoria": "Esporte e Lazer", "end": "Rua Mário Tavares, 1010, Bairro Centro, Santo Antônio do Pinhal-SP, CEP: 12450-000", "insta": "@saf.clube" },
+        { "nome": "Estudio Keneya", "categoria": "Arte e Cultura", "end": "Capitão Luiz Jacinto da Silva, Final da rua, Bairro Cassununga, Santo Antonio do Pinhal, Sp", "insta": "@briangomes" },
+        { "nome": "Tallys toledo especialista em negociações", "categoria": "Imobiliário", "end": "Rua Virgílio Faria da Costa, 37. Bairro Centro. Santo antonio do pinhal. Cep: 12450000", "insta": "@tallystoledoimoveis" },
+        { "nome": "Toledo negócios", "categoria": "Comércio Automotivo", "end": "Rua Virgílio Faria da Costa, 37, Centro, Santo antonio do pinhal", "insta": "toledo.negocios" },
+        { "nome": "Toledo car", "categoria": "Estética Automotiva", "end": "Av governador Carvalho pinto, 429, Centro, Santo antonio do pinhal, Sp", "insta": "@toledo_car_estetica" },
+        { "nome": "Lá Creperie", "categoria": "Alimentação", "end": "Cel Sebastião Marcondes da Silva, 62, Bairro Centro, Santo Antônio do Pinhal", "insta": "@oficiallacreperie" },
+        { "nome": "Cachoeira do Lageado", "categoria": "Turismo e Lazer", "end": "Celso gatto, 10, Centro, Santo Antônio do Pinhal, SP", "insta": "@cachoeiralageadobr" },
+        { "nome": "Imperiu's bar e restaurante", "categoria": "Alimentação", "end": "Rua Sebastião Marcondes da Silva, 06, Bairro CENTRO, Santo Antônio do Pinhal, Sp", "insta": "https://www.instagram.com/imperiusbarerestaurante/" },
+        { "nome": "The Doctor Pipo", "categoria": "Serviços e Comércio", "end": "Travessa padre Sebastião Hugo Santana, 8, Bairro Centro, Santo Antônio do Pinhal, SP", "insta": "Não tem" },
+        { "nome": "Prata d’ Lua", "categoria": "Comércio e Varejo", "end": "Avenida Ministro Nelson Hungria, 388, Centro, Santo Antonio do Oinhal, 12450-000", "insta": "Nao tem" },
+        { "nome": "OpçãoMotos", "categoria": "Serviços Automotivos", "end": "Maria Ferreira de lima, 177, Bairro Joaquim Alves, Santo Antônio do Pinhal", "insta": "*opcao_motos*" },
+        { "nome": "Luana Mantegazza", "categoria": "Saúde e Bem-Estar", "end": "Rodovia SP 46 km 156, Km 156, Bairro Rio Preto, Santo Antonio do Pinhal, Sp. Cep: 12450-000", "insta": "@luana.mantegazza" },
+        { "nome": "Guitarrista geek", "categoria": "Audiovisual e Cinema", "end": "Av ministro nelson hungria, 303, Bairro Centro, Santo Antônio do pinhal", "insta": "Nao" },
+        { "nome": "Wesley v8 Barbershop", "categoria": "Cuidado pessoal", "end": "Av ministro nelson hungria, 299, Bairro Centro, Santo antonio do pinhal", "insta": "Nao" },
+        { "nome": "Zap Burguer Delivery", "categoria": "Alimentação e Bebidas", "end": "Av. Ministro Nelson Hungria, 608, Centro, Santo Antônio do Pinhal", "insta": "Nao tem" },
+        { "nome": "Guia Pinhal", "categoria": "Turismo e Hospedagem", "end": "Rua Procopio Marcondes de Azeredo, 131, Bairro Centro, Santo Antônio do Pinhal, SP", "insta": "www.guiapinhal.com.br" },
+        { "nome": "Empório restaurante sabor mineiro", "categoria": "Alimentação e Bebidas", "end": "Rod Oswaldo Barbosa guisard, 166, Bairro Estacao eugenio lefreve, Santo Antônio do pinhal, Sp", "insta": "Instagram" },
+        { "nome": "Papelaria Cores da Terra", "categoria": "Comércio e Varejo", "end": "rua Gumercindo Jacinto da Silva, 31, Bairro Centro, Santo Antonio do Pinhal", "insta": "@roneidecoosta" },
+        { "nome": "Alfa king Food", "categoria": "Alimentação", "end": "Av. Ministro Nelson Hungria, 225, Bairro Centro, Santo Antônio do Pinhal, SP", "insta": "oalpha2024@gmail.com" },
+        { "nome": "Doutor Repara", "categoria": "Comércio e Varejo", "end": "Rua Maria Ferreira de Lima, 383, Bairro Joaquim Alves, Santo Antônio", "insta": "Nao" },
+        { "nome": "Alto da Mantiqueira - Marketing", "categoria": "Marketing", "end": "Avenida Ministro Nelson Hungria, 615, Centro, Santo Antônio do pinhal, SP", "insta": "Instagram" },
+        { "nome": "Reserva Santo Antonio do Pinhal", "categoria": "Turismo e Hospedagem", "end": "Dr Lourenço de Sa, 1060, Bairro Sertãozinho, Santo Antonio do Pinhal", "insta": "www.reservasantoantonio.com.br" },
+        { "nome": "Saint Coffee Mantiqueira", "categoria": "Cafeteria", "end": "Dr. Lourenço de Sá, 1060, Bairro Sertaozinho, Santo Antônio do Pinhal, Sp", "insta": "saintcoffeemantiqueira" },
+        { "nome": "Start Security", "categoria": "Tecnologia e Segurança", "end": "Estrada Municipal das cerejeiras, 2049, Bairro Barreiro, Santo Antônio do Pinhal, SP", "insta": "" },
+        { "nome": "Pousada Highland", "categoria": "Turismo e Hospedagem", "end": "Estrada Municipal Vereador Arlindo Inácio Fernandes, 1900, Bairro Machadinho, Santo Antonio", "insta": "pousadahighland.com.br" },
+        { "nome": "KSX COMUNICAÇÃO VISUAL", "categoria": "Comunicação Visual", "end": "Rua coronel manoel martins junior, 330, Bairro Jd Esplanada II, são josé dos campos, Sp", "insta": "ksx@ksxvisual.com.br" },
+        { "nome": "Ecosss", "categoria": "Comércio e Varejo", "end": "Rua Abade Predoso, 173, Centro, São bento do Sapucaí, SP, Cep: 12490-000", "insta": "@ecosss.ad" },
+        { "nome": "Padaria Pão da Serra", "categoria": "Alimentação", "end": "Avenida Ministro Nelson Hungria, 446, Centro, Santo Antônio do Pinhal, SP, Cep: 12450000", "insta": "@paodaserrasap" },
+        { "nome": "Spetos House", "categoria": "Alimentação", "end": "Avenida Ministro Nelson Hungria, 569, Bairro Centro, Santo antonio", "insta": "@spetos_house" },
+        { "nome": "Vinícola Essenza", "categoria": "Turismo e Lazer", "end": "Estrada do barretinho, 1900, Bairro Rio Preto, Santo antonio, Sp", "insta": "@espacoessenza.oficial" },
+        { "nome": "Oficina do Zago", "categoria": "Serviços Automotivos", "end": "Av das hortênsias, 95, Bairro Ventro, Santo antonio", "insta": "Instagram" },
+        { "nome": "Hotel Platanus", "categoria": "Turismo e Hospedagem", "end": "Av frei Orestes girardi, 03, Bairro Fracalanza, Campos de jordao, Cep: 12450000", "insta": "@hotelplatanus" },
+        { "nome": "Cervejaria Araukarien", "categoria": "Alimentação e Bebidas", "end": "Rod. Oswaldo Barbosa Guisard, 7600, Bairro Rio Preto, Santo Antônio do Pinhal, Sp", "insta": "@araukarien" },
+        { "nome": "Vinhas do Ponhal", "categoria": "Turismo e Hospedagem", "end": "Estrada Francisca do santos silva, 560, Bairro Santa cruz, Santo antonio", "insta": "@pousada.vinhasdopinhal" },
+        { "nome": "Flor'Essência Terapias Naturais e Integrativas", "categoria": "Saúde e Bem-Estar", "end": "Rua: Abade Pedrosa, 173 - Centro, São Bento do Sapucaí - SP. Cep: 12490000", "insta": "não tem" },
+        { "nome": "Pousada Reserva Nativida", "categoria": "Turismo e Hospedagem", "end": "Rua Benedito Marcelo de Mello, 645, Bairro lajeado, Santo Antônio do pinhal, Sp", "insta": "reservanatividasap" },
+        { "nome": "Pousada Caminito", "categoria": "Turismo e Hospedagem", "end": "Rua Expedito Costa manso, 116, Bairro Centro, Santo antonio", "insta": "@pousadas_grupogoes" },
+        { "nome": "Pousada Chalés Vista Linda", "categoria": "Turismo e Hospedagem", "end": "Rua Antônio José Ramos, S n, Bairro Centro, Santo antonio", "insta": "@pousada_grupogoes" },
+        { "nome": "Estrela da Serra Hotel Fazenda", "categoria": "Turismo e Hospedagem", "end": "Estrada Barreirinha, s/n, Bairro Rio Preto, Santo Antônio do Pinhal, SP", "insta": "@pousadas_grupogoes" },
+        { "nome": "Drogaria Mantiqueira", "categoria": "Saúde e Bem-Estar", "end": "Rua Expedito Costa Manso, 49, Bairro Centro, Santo antonio", "insta": "Não tem" },
+        { "nome": "Vicente fotografias", "categoria": "Arte e Cultura", "end": "Rodovia sp 46, Km 156, Bairro Rio preto, Santo antonio", "insta": "@vicsampdreams" },
+        { "nome": "Amore home", "categoria": "Casa mesa e banho", "end": "Rua Antonio jose de oliveira, 345, Bairro Centro, Santo Antonio do Pinhal", "insta": "Nao tem" },
+        { "nome": "Pousada Olivier", "categoria": "Turismo e Hospedagem", "end": "Francisca Maria de Jesus, 67 apto 64, Bairro Floradas de São José, São José dos Campos - SP, Cep: 12230083", "insta": "Www.pousadaolivier.com.br" },
+        { "nome": "Dentista Prime", "categoria": "Saúde e Bem-Estar", "end": "Av Ministro Nelson Hungria, 590, Bairro Centro, Santo Antônio do Pinhal, Sp", "insta": "@drvictorbicudo" },
+        { "nome": "Pousada Alpes", "categoria": "Turismo e Hospedagem", "end": "Rua Urbano Moreira Filho, 319, Bairro Barreiro, Santo antonio, 12450-000", "insta": "@alpespousada" },
+        { "nome": "Hotel Reserva Campos do Jordão", "categoria": "Turismo e Hospedagem", "end": "Januário Pereira, 150. Bairro Alto do Capivari. Campos do Jordão, SP", "insta": "https://reservacampos.com.br/" },
+        { "nome": "Hotel Reserva Ilhabela", "categoria": "Turismo e Hospedagem", "end": "Avenida José Lins do Regô, 29, Bairro Feiticeira, Ilhabela, Sp. Cep: 11640434", "insta": "Instagram" },
+        { "nome": "Hotel Reserva Camburi", "categoria": "Turismo e Hospedagem", "end": "Estrada Rio das Pedras, 2828, Bairro Sertão de Camburi, São Sebastião, SP, CEP: 11619112", "insta": "Instagram" },
+        { "nome": "Limpeza de Estofados - Marcelo", "categoria": "Serviços Domésticos", "end": "Av. Ministro Nelson Hungria, 300, Bairro CENTRO, SANTO ANTONIO DO PINHAL", "insta": "https://www.instagram.com/limpezadesofa.sp/" },
+        { "nome": "JMartins - Arquitetura e Urbanismo", "categoria": "Arquitetura e Urbanismo", "end": "Av Min Nelson Hungria, 471, Bairro Centro, Santo Antônio do Pinhal, SP", "insta": "jrmartins.arquitetura.com.br" },
+        { "nome": "Pousada Chalé Sol Nascente", "categoria": "Turismo e Hospedagem", "end": "Estrada Municipal Sebastião Onório Pereira, 194, Bairro Rio Preto, Santo Antônio do Pinhal, Sp. Cep: 12450000", "insta": "Instagram, Facebook" },
+        { "nome": "Imobiliária Apoio", "categoria": "Imobiliário", "end": "Avenida Ministro Nelson Hungria, 204, Bairro Centro, Santo Antônio do Pinhal, SP, Cep: 12450-000", "insta": "@imobiliaria_apoio" },
+        { "nome": "Studio Nisikawa", "categoria": "Saúde e Bem-Estar", "end": "Estrada do Lageado , 555, Bairro Lageado, Santo Antônio do Pinhal, SP. Cep: 12450-000", "insta": "@studionisikawa" },
+        { "nome": "Alquimia", "categoria": "Alimentação", "end": "Avenida Ministro Nelson Hungria, 512, Bairro Centro, Santo antonio, Sp, Cep: 12340000", "insta": "@alquimia_gourmett" },
+        { "nome": "Colab gestão", "categoria": "Eventos e Cultura", "end": "Não tem endereço, Sem numero, Bairro Sertaozinho, Santo Antonio, Sp", "insta": "Não tem" },
+        { "nome": "Zezinho Correror de Imóveis", "categoria": "Imobiliário", "end": "Rua João Antônio moliterno, 991, Vila de Fatima, Santo Antônio do Pinhal", "insta": "@jose.a.filho2" },
+        { "nome": "Empório Santo Antonio", "categoria": "Comércio e Varejo", "end": "Avenida Ministra Nelson Hungria, 325, Bairro Centro, Santo Antônio do Ponhal", "insta": "@emporiostoantonio_sap" },
+        { "nome": "Morada Solar", "categoria": "Turismo e Hospedagem", "end": "Rua Cândido Teodoro de faria, 1016, Bairro Barreiro, Santo Antônio do ponhal - SP", "insta": "@moradasolrsap" },
+        { "nome": "Nativo Centro de treinamento", "categoria": "Saúde e Bem-Estar", "end": "Rua Givernador Carvalho Pinto, 520, Bairro Centro, Santo antonio", "insta": "@nativoct" },
+        { "nome": "Eleve Soluções em Websites", "categoria": "Desenvolvimento de Sites", "end": "R MARIA FERREIRA DE LIMA, 1173, Bairro Joaquim Alves, Santo Antônio do Pinhal, Sp", "insta": "crdwebdesign" },
+        { "nome": "Mandala perfumes", "categoria": "Saúde e Bem-Estar", "end": "Dr Lourenço de Sá, 1060, Centro, Santo Antônio do Pinhal", "insta": "@mandalablume" },
+        { "nome": "Black Ranch Cabin", "categoria": "Turismo e Hospedagem", "end": "Dr Lourenço de Sá, 850, Bairro Centro, Santo Antônio do Pinhal", "insta": "Em desenvolvimento" },
+        { "nome": "Toledo Negócios Car", "categoria": "Comércio Automotivo", "end": "Avenida Ministro Nelson Hungria, 159, Bairro Centro, Santo Antônio do ponhal", "insta": "toledonegocios" },
+        { "nome": "Dona Lola Bolo com Café", "categoria": "Gastronomia", "end": "Av. Ministro Nelson Hungria, 350, Bairro Centro, Santo Antônio do Pinhal, Sp, Cep: 12450-000", "insta": "@donalola_bolos" },
+        { "nome": "Aumi Boutique Pet", "categoria": "Petshop", "end": "Avenida Antônio Joaquim de Oliveira, 345, Bairro Centro, Santo Antônio, SP. Cep: 1245000", "insta": "@aumi.boutiquepet" },
+        { "nome": "Restaurante Torre do Pinhão", "categoria": "Alimentação e Bebidas", "end": "Av Ministro Nelson Hungria, 533, Bairro Centro, Santo antonio", "insta": "restaurantetorredopinhao" },
+        { "nome": "Restaurante Arco Íres", "categoria": "Alimentação e Bebidas", "end": "Avenida Antônio J de Oliveira, 366, Bairro Rio das pedras, Santo antonio, Sp", "insta": "arcoiris_restaurante" },
+        { "nome": "Empório Torre do Pinhão", "categoria": "Alimentação e Bebidas", "end": "Av Ministro Nelson Hungria, 464, Bairro Centro, Santo Antonio, SP", "insta": "emporiotorredopinhao" },
+        { "nome": "Araukarien Restaurante", "categoria": "Alimentação e Bebidas", "end": "Rodovia Oswaldo Barbosa Guisard, 7600, Bairro Rio Preto, Santo antonio, Sp", "insta": "araukariencwrveja" },
+        { "nome": "Juliano's Restaurante", "categoria": "Alimentação e Bebidas", "end": "Pedro Cunha, 215, Centro, Itanhandu - MG, CEP: 37464000", "insta": "https://www.instagram.com/julianosrestaurante/" },
+        { "nome": "Solarium Mantiqueira", "categoria": "Experiência de Estadia/Acomodação", "end": "Estrada do Jardim, S/N, Bairro Olaria, Itanhandu, MG", "insta": "https://www.instagram.com/solariummantiqueira" },
+        { "nome": "Dra. Jaqueline Rabelo - Consultório Odontológico", "categoria": "Serviços Odontológicos", "end": "Rua Nicolau Scarpa, 145, Centro, Itanhandu", "insta": "drajaquelinerabelo" },
+        { "nome": "Café ponto Chic", "categoria": "Alimentação e Bebidas", "end": "Avenida ministro Nelson Hungria, 556, Bairro Centro, Santo Antônio Pinhal", "insta": "cafepontochic_" },
+        { "nome": "Bicicletiaria do Josi", "categoria": "Serviços e Comércio", "end": "Rua Maria Jacinto Faria, 102, Bairro Centro, Sap", "insta": "Ainda não tem" },
+        { "nome": "Spa Mantiqueira", "categoria": "Saúde e Bem-Estar", "end": "Rua Dr Lourenço de SA, 720, Bairro Centro, Santo Antônio do Pinhal, Sp", "insta": "@spamantiqueira" },
+        { "nome": "Vinhos na Serra", "categoria": "Alimentação e Bebidas", "end": "Rua paulo Riba, 76, Bairro Capivari, Campos do Jordao", "insta": "vinhos.naserra" },
+        { "nome": "Delícias Gourmet", "categoria": "Café gourmet", "end": "Travessa Jacinto Maria Faria, 16, Centro, Santo Antônio, Cep: 12350000", "insta": "@cafeteria.deliciasgourmet" },
+        { "nome": "Casa das Flores", "categoria": "Turismo e Hospedagem", "end": "R. Dr. Lourenço de Sá, 730, Bairro Centro, Santo Antônio do Pinhal, Sp", "insta": "@maisonsdemontagne" },
+        { "nome": "MUSEA TECNOLOGIA DA INFORMACAO LTDA", "categoria": "Tecnologia e Informação", "end": "Rua Cristal, 2, Bairro Sertãozinho, Santo Antônio do Pinhal, Sp", "insta": "@museaart" },
+        { "nome": "Fornalha Pizzaria", "categoria": "Alimentação e Bebidas", "end": "Avenida Antônio José de Oliveira, 203, Bairro Centro, Santo Antônio do Pinhal, SP. Cep: 12450-000", "insta": "@fornalhapizzariasap" },
+        { "nome": "Posto de gasolina São Paulo", "categoria": "Serviços", "end": "Avenida Ministto Nelson Hungria, 729, Bairro Centro, Santo Antônio do pinhal", "insta": "Não" },
+        { "nome": "Vanderlei elétrica e hidraulica", "categoria": "Serviços", "end": "Rua doutor arruda, 75, Bairro Centro, Santo antonio", "insta": "@oliveiravanderleygomes" },
+        { "nome": "Fernando Taxista", "categoria": "Transporte e Serviços", "end": "Rua Sebastião Laercio Marcondes César, 74, Bairro Crntro, Santo antonio, Cep: 12450-000", "insta": "fernando_taxistasap" },
+        { "nome": "Sats Capital", "categoria": "Finanças e Tecnologia", "end": "Main St South, 22, Bairro N/A, Kleefeld", "insta": "@satscapital" },
+        { "nome": "Pizzaria La Taverna Di Lucca", "categoria": "Alimentação", "end": "Rua Coronel Marconde da Silva, 28, Bairro Centro, Santo Antonio", "insta": "latavernadilucca" },
+        { "nome": "Supermercado Amaral", "categoria": "Alimentação", "end": "Rua governador Carvalho Pinto, 23, Bairro Centro, Santo antonio", "insta": "Supermercado.amaral" },
+        { "nome": "Pakito Lanches", "categoria": "Alimentação e Bebidas", "end": "Rua Vicente Chiara Dias, 67, Bairro Cebtro, Santo Antonio", "insta": "Instagram" },
+        { "nome": "Pakito Refrigeração", "categoria": "Serviços", "end": "Rua Manoel Brandão de Faria, 420, Bairro Renopolis, Santo antonio, Cep: 12450-000", "insta": "@pakito1540" },
+        { "nome": "Táxi Ralf", "categoria": "Transporte", "end": "Rua Gumercindo Fernandes da Silva, 21, Bairro Cristal, Santo Antônio Pinhal", "insta": "_oralfleite" },
+        { "nome": "Marta Cabelereira", "categoria": "Cabelereiro", "end": "Doutor Lourenço de Sá, 204, Bairro Centro, Santo Antônio", "insta": "Nao" },
+        { "nome": "Ferrera Engenharia", "categoria": "Construção civil", "end": "Rua dos lírios, 16, Bairro Centro, Santo Antônio do Pinhal, SP", "insta": "@ferreraengenharia" },
+        { "nome": "Meraki fisioterapia e pilates", "categoria": "Saúde e Bem-Estar", "end": "Rua Antônio Joaquim de Oliveira, 247, Centro, Santo Antônio do Pinhal", "insta": "@Fisioterapiameraki_" },
+        { "nome": "Aldeia do Holon", "categoria": "Turismo e Hospedagem", "end": "Rua Lídio Gonçalves da Silva, Sem numero, Bairro dos melos, Campos do Jordao, Cep: 12471-052", "insta": "@aldeiadoholon" },
+        { "nome": "Hunter Cel", "categoria": "Assistência Técnica", "end": "Rua conego thimaz, 42 , loja 4, Bairro Centro, Santo Antônio do Ponhal, SP, Cep: 12450-000", "insta": "@hunter_cel_" },
+        { "nome": "Camping Paraíso Na Serra", "categoria": "Turismo e Hospedagem", "end": "Rua Joaquim Ferreira Lúcio, Sem número, Bairro Dos melos, Campos do jordao, SP, Cep: 12460-000", "insta": "@campingparaisonaserra" },
+        { "nome": "Couple Beauty Salon", "categoria": "Saúde e Bem-Estar", "end": "Av.ministro Nelson Hungria, 787. Bairro Centro. Santo Antônio do Pinhal, Sp. Cep: 12450000", "insta": "@barbearia.couplebeautysalon" },
+        { "nome": "Riso Bistrô da Mantiqueira", "categoria": "Alimentação", "end": "Ac Ministro Melaon Hungria, 827 loja 3, Bairro Centro, Santo antonio", "insta": "@risobistrosap" },
+        { "nome": "Buteco ZigZag", "categoria": "Restaurante", "end": "avenida Antônio Joaquim de Oliveira, 339, Bairro Vilarejo shopping, Sap", "insta": "@butecozigzag" },
+        { "nome": "Festival de Jazz Jardim Suspenso da Babilônia", "categoria": "Eventos e Cultura", "end": "Rodovia SP 46 km, Km 156,5, Bairro Rio Preto, Santo Antônio do Pinhal, SP", "insta": "@jardimsuspensodababilonia" },
+        { "nome": "Restaurante Caminho das Gerais", "categoria": "Alimentação", "end": "Rodovia sp 46 km 153,5, Bairro Rio Preto, Santo Antônio do ponhal, Sp. Cep: 12450000", "insta": "@restaurantecaminhodasgerais" },
+        { "nome": "Arena Entre Montanhas", "categoria": "Esporte e Lazer", "end": "Rodovia SP 46, 6799, Bairro Rio Preto, Santo Antônio do Ponhal, CEP: 12450-000", "insta": "@arenaentremontanhas" },
+        { "nome": "Amoras Carol - Geleias Artesanais", "categoria": "Geleias Artesanais", "end": "Estrada do Sertaozinho, Sem número. Bairro sertaozinho. Santo Antônio do pinhal, Sp. Cep: 12450-000", "insta": "@amoras.carol.sap" },
+        { "nome": "Chef Julia", "categoria": "Alimentação", "end": "Estrada do Lageado, 17, Bairro Lageado, Santo Antônio do Pinhal", "insta": "@chefjuliarocha" },
+        { "nome": "Choperia Contêiner", "categoria": "Alimentação e Bebidas", "end": "Travessa Maria Jacinto Faria, 16, Centro, Santo Antônio do Pinhal, SP, Cep: 12450009", "insta": "Instagram" },
+        { "nome": "Óticas Cadiz", "categoria": "Comércio e Varejo", "end": "Rua Antônio José de Oliveira , 22, Bairro Centro, Sap", "insta": "@oticascadiz" },
+        { "nome": "Henrique Gás", "categoria": "Comércio e Varejo", "end": "Rua Dona Maria Ferreira de Lima, 106, Bairro Joaquim Alves, Santo Antônio, SP, Cep: 12440-000", "insta": "Nao" },
+        { "nome": "Amei Canecas", "categoria": "Comércio e Varejo", "end": "Rua Ministro Nelson Hungria, 512 loja 2, Bairro Centro, Santo Antônio do Pinhal", "insta": "@amei.canecas" },
+        { "nome": "Villa Cacau", "categoria": "Empório Gourmet", "end": "Av. Ministro Nelson Hungria, 332, Centro, Santo Antônio do Pinhal", "insta": "villacacausap" },
+        { "nome": "Amore Home Decor", "categoria": "Casa e Decoração", "end": "Av ministro Nelson Hungria, 57, Bairro Centro, Santo anto", "insta": "@amorehome" },
+        { "nome": "Pousada Recanto Libralon", "categoria": "Turismo e Hospedagem", "end": "Est. Mun. Francisca dos Santos Silva, S/N, Bairro Santa Cruz, Santo Antônio do Pinhal, SP", "insta": "@Recanto Libralon" },
+        { "nome": "Fernando Ramos toledo Grillo Seguros e Advocacia", "categoria": "Serviços", "end": "Av Frei Oreste Girardi, 857, Bairro Centro, Campos do jordao", "insta": "Não" },
+        { "nome": "Ótica Cadiz", "categoria": "Comércio e Varejo", "end": "Praça Lamartine José de Faria, 20A, Bairro Centro, Sapucaí Mirim, MG", "insta": "@oticascadiz" },
+        { "nome": "Tulio Treinador", "categoria": "Saúde e Bem-Estar", "end": "Governador carvalho pinto, 293, Bairro Centro, Santo Antônio do Pinhal, Sp, Cep: 12450-003", "insta": "tulioprado03" },
+        { "nome": "Dra. Carolina Alonso", "categoria": "Saúde e Bem-Estar", "end": "Rodovia Osvaldo Barbosa Guisard km 166, 166, Condominio portal da Mantiqueira, Santo Antônio do Pinhal, SP", "insta": "nenhum" },
+        { "nome": "Galápagos Livros", "categoria": "Livraria e Sebo", "end": "Em branco (não aplicável)", "insta": "https://www.instagram.com/galapagoslivros" },
+        { "nome": "Dema Advogados & Associados", "categoria": "Serviços", "end": "Rua esmeralda, 25, Bairro Cristal, Santo Antonio do Pinhal Sp, Cep: 12450-047", "insta": "@dema.advogados_associados" },
+        { "nome": "Ótica Mercadão dos Oculos", "categoria": "Saude", "end": "Av Tancredo Neves, 214, Centro, Sapucai mirim", "insta": "https://www.instagram.com/mercadaodosoculossapucaimirim?igsh=MTJqdG5vaHgwcThhZQ==" },
+        { "nome": "Empório Trem de Minas", "categoria": "Alimentação e Bebidas", "end": "Vilarejo shoppin, Loja 8, Bairro Centro, Santo antonio", "insta": "@emporiotremdemonaa" },
+        { "nome": "Pousada Lá colline", "categoria": "Turismo e Hospedagem", "end": "Avenida ministro Hungria, 328, Bairro Centro, Santo Antônio do Pinhal, SP", "insta": "@Oousadalacolline" },
+        { "nome": "Couro Schmitz Campos", "categoria": "Comércio e Varejo", "end": "Rua Djalma Forjaz ( shopping aspem mal), 72/78 - loja 11, Bairro Olhar no mapa, Campos do Jordão", "insta": "@couroschmitzecia" },
+        { "nome": "Larissa Galvão - Tradutora", "categoria": "Serviços", "end": "Rua Vicente Chiaradia, 275, Bairro Centro, Santo Antônio do Pinhal, Sp", "insta": "Não tem" },
+        { "nome": "Gilberto Taxi", "categoria": "Trasporte", "end": "José Ferreira de Lima, 48, Bairro Joaquim Alves, Santo antonio. Cep: 12450-000", "insta": "Vou pedir" },
+        { "nome": "Sauá território vivo", "categoria": "Arte e Cultura", "end": "Rua Antônio José Ramos, 66, Bairro Centro, St antonio", "insta": "@espacosaua" },
+        { "nome": "The Garden", "categoria": "Alimentação e Bebidas", "end": "Av governador Carvalho Pinto, 810, Ventro, Santo antonio, Cep: 12450000", "insta": "@thegardensap" },
+        { "nome": "Registro Civil e Tabelionato de notas de Santo Antônio do Pinhal", "categoria": "Cartorio", "end": "Rua expedito Costa manso, 193, Bairro Centro, Santo antonio", "insta": "Nao" }
+    ];
+
+    // Injeta IDs nos dados
+    const estabelecimentos = rawData.map((item, index) => ({ ...item, id: index }));
+
+    // Variáveis de Estado
+    const grid = document.getElementById('grid');
+    const filterDiv = document.getElementById('filters');
+    const searchInput = document.getElementById('searchInput');
+    const btnPdf = document.getElementById('btnPdf');
+    const btnCustomize = document.getElementById('btnCustomize');
+    const btnSaveRoute = document.getElementById('btnSaveRoute');
+    
+    let activeCategories = new Set(['Todos']);
+    let searchQuery = '';
+    let isCustomizeMode = false;
+    let selectedIds = new Set();
+
+    function formatInsta(instaRaw) {
+        if (!instaRaw) return 'Não informado';
+        let cleaned = instaRaw.trim();
+        let lower = cleaned.toLowerCase();
+        const invalidos = ['não', 'nao', 'não tem', 'nao tem', 'não possui', 'não informado', 'instagram', 'nenhum', 'em desenvolvimento', 'vou pedir', 'ainda não tem', 'instagram, facebook'];
+        if (invalidos.includes(lower)) return cleaned; 
+        if (lower.startsWith('http') || lower.startsWith('www') || lower.includes('.com') || lower.includes('.cc')) {
+            let url = lower.startsWith('http') ? cleaned : 'https://' + cleaned;
+            return `<a href="${url}" target="_blank">Acessar Link</a>`;
+        }
+        let username = cleaned.replace(/^@+/, ''); 
+        return `<a href="https://www.instagram.com/${username}" target="_blank">@${username}</a>`;
+    }
+
+    function toggleCustomize() {
+        isCustomizeMode = !isCustomizeMode;
+        if (isCustomizeMode) {
+            btnCustomize.classList.add('active');
+            btnCustomize.innerHTML = '✅ Modo Roteiro Ativo';
+            btnSaveRoute.style.display = 'inline-block';
+            document.body.classList.add('customize-mode');
+        } else {
+            btnCustomize.classList.remove('active');
+            btnCustomize.innerHTML = '🛠 Personalizar Rota';
+            btnSaveRoute.style.display = 'none';
+            document.body.classList.remove('customize-mode');
+        }
+        updatePdfButton();
+        render();
+    }
+
+    function toggleSelect(event, id) {
+        if (!isCustomizeMode) return;
+        if (event.target.tagName.toLowerCase() === 'a') return;
+
+        if (selectedIds.has(id)) {
+            selectedIds.delete(id);
+        } else {
+            selectedIds.add(id);
+        }
+        updatePdfButton();
+        render();
+    }
+
+    function updatePdfButton() {
+        if (isCustomizeMode && selectedIds.size > 0) {
+            btnPdf.innerText = `📥 Gerar Meu Roteiro (${selectedIds.size})`;
+        } else {
+            btnPdf.innerText = `📥 Gerar PDF do Guia`;
+        }
+    }
+
+    function handlePrint() {
+        if (isCustomizeMode) {
+            if (selectedIds.size === 0) {
+                alert('Selecione pelo menos um estabelecimento para o seu Roteiro.');
+                return;
+            }
+            const originalGridHtml = grid.innerHTML;
+            const cardsToPrint = estabelecimentos.filter(item => selectedIds.has(item.id));
+            grid.innerHTML = generateCardsHTML(cardsToPrint);
+            setTimeout(() => {
+                window.print();
+                grid.innerHTML = originalGridHtml; 
+            }, 150);
+        } else {
+            window.print();
+        }
+    }
+
+    // ------- Lógica de Salvar Localmente -------
+    function saveRoute() {
+        if (selectedIds.size === 0) {
+            alert("Selecione pelo menos um estabelecimento para salvar seu roteiro.");
+            return;
+        }
+        const routeName = prompt("Digite um nome ou alias para este roteiro (Ex: Dia 1, Noite de Pizza, etc):");
+        if (!routeName || routeName.trim() === "") return;
+
+        const routes = JSON.parse(localStorage.getItem('bitcoin_routes') || '[]');
+        routes.push({
+            name: routeName.trim(),
+            ids: Array.from(selectedIds),
+            date: new Date().toLocaleDateString('pt-BR')
+        });
+        localStorage.setItem('bitcoin_routes', JSON.stringify(routes));
+        alert("Roteiro salvo com sucesso na sua máquina!");
+    }
+
+    function openRoutesModal() {
+        document.getElementById('routesModal').style.display = 'flex';
+        renderSavedRoutes();
+    }
+
+    function closeRoutesModal() {
+        document.getElementById('routesModal').style.display = 'none';
+    }
+
+    function renderSavedRoutes() {
+        const list = document.getElementById('savedRoutesList');
+        const routes = JSON.parse(localStorage.getItem('bitcoin_routes') || '[]');
+        
+        if (routes.length === 0) {
+            list.innerHTML = '<p style="text-align:center; color:#777; margin-top:20px;">Você ainda não tem nenhum roteiro salvo.</p>';
+            return;
+        }
+        
+        list.innerHTML = routes.map((route, index) => `
+            <div class="route-item">
+                <div class="route-info">
+                    <strong>${route.name}</strong>
+                    <small>${route.ids.length} locais selecionados • Criado em ${route.date}</small>
+                </div>
+                <div class="route-actions">
+                    <button class="btn-load" onclick="loadRoute(${index})">Carregar</button>
+                    <button class="btn-delete" onclick="deleteRoute(${index})">🗑</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function loadRoute(index) {
+        const routes = JSON.parse(localStorage.getItem('bitcoin_routes') || '[]');
+        const route = routes[index];
+        if (!route) return;
+
+        if (!isCustomizeMode) {
+            toggleCustomize();
+        }
+        
+        activeCategories.clear();
+        activeCategories.add('Todos');
+        document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('active');
+            if (b.innerText === 'Todos') b.classList.add('active');
+        });
+        
+        searchQuery = '';
+        searchInput.value = '';
+        selectedIds = new Set(route.ids);
+        
+        closeRoutesModal();
+        updatePdfButton();
+        render();
+        alert(`O roteiro "${route.name}" foi carregado com sucesso!`);
+    }
+
+    function deleteRoute(index) {
+        if (!confirm("Tem certeza que deseja excluir este roteiro salvo?")) return;
+        const routes = JSON.parse(localStorage.getItem('bitcoin_routes') || '[]');
+        routes.splice(index, 1);
+        localStorage.setItem('bitcoin_routes', JSON.stringify(routes));
+        renderSavedRoutes();
+    }
+
+    // Fechar modal ao clicar fora da caixa branca
+    window.onclick = function(event) {
+        const modal = document.getElementById('routesModal');
+        if (event.target === modal) closeRoutesModal();
+    }
+
+    // ------- Fim Lógica de Salvar Localmente -------
+
+    searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase();
+        render();
+    });
+
+    function generateCardsHTML(items) {
+        return items.map(item => {
+            const isSelected = selectedIds.has(item.id);
+            const selectionClass = isSelected && isCustomizeMode ? 'selected' : '';
+            const clickEvent = isCustomizeMode ? `onclick="toggleSelect(event, ${item.id})"` : '';
+            const checkIcon = isCustomizeMode ? `<div class="checkbox">${isSelected ? '✓' : ''}</div>` : '';
+
+            return `
+                <div class="card ${selectionClass}" ${clickEvent}>
+                    <div class="card-header">
+                        <div class="tag">${item.categoria}</div>
+                        ${checkIcon}
+                    </div>
+                    <h3>${item.nome}</h3>
+                    <p>📍 ${item.end}</p>
+                    <p>📸 ${formatInsta(item.insta)}</p>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function render() {
+        const filtered = estabelecimentos.filter(item => {
+            const matchCategory = activeCategories.has('Todos') || activeCategories.has(item.categoria);
+            const searchStr = searchQuery;
+            const matchSearch = searchStr === '' || 
+                                (item.nome && item.nome.toLowerCase().includes(searchStr)) || 
+                                (item.categoria && item.categoria.toLowerCase().includes(searchStr)) || 
+                                (item.end && item.end.toLowerCase().includes(searchStr)) || 
+                                (item.insta && item.insta.toLowerCase().includes(searchStr));
+            return matchCategory && matchSearch;
+        });
+
+        grid.innerHTML = generateCardsHTML(filtered);
+    }
+
+    const cats = ['Todos', ...new Set(estabelecimentos.map(i => i.categoria))];
+    
+    cats.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        if (cat === 'Todos') btn.classList.add('active');
+        btn.innerText = cat;
+        
+        btn.onclick = (e) => {
+            if (cat === 'Todos') {
+                activeCategories.clear();
+                activeCategories.add('Todos');
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            } else {
+                activeCategories.delete('Todos');
+                const btnTodos = filterDiv.querySelector('.filter-btn');
+                if (btnTodos) btnTodos.classList.remove('active');
+
+                if (activeCategories.has(cat)) {
+                    activeCategories.delete(cat);
+                    btn.classList.remove('active');
+                } else {
+                    activeCategories.add(cat);
+                    btn.classList.add('active');
+                }
+
+                if (activeCategories.size === 0) {
+                    activeCategories.add('Todos');
+                    if (btnTodos) btnTodos.classList.add('active');
+                }
+            }
+            render();
+        };
+        filterDiv.appendChild(btn);
+    });
+
+    render();
+</script>
+</body>
+</html>

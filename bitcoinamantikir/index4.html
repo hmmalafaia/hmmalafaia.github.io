@@ -6,22 +6,27 @@
     <title>A Rota do Bitcoin - Guia Completo</title>
     <style>
         :root { --bitcoin: #f7931a; }
+        html { scroll-behavior: smooth; }
         body { font-family: sans-serif; background: #f4f4f4; padding: 20px; margin: 0; }
         .container { max-width: 900px; margin: auto; }
         .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .btn-pdf { background: #d9534f; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        /* Botão PDF Desktop */
+        .btn-pdf { background: #d9534f; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-pdf:hover { background: #c9302c; }
         
         /* Estilos da Busca */
         .search-container { margin-bottom: 20px; display: flex; justify-content: center; }
         .search-input { width: 100%; max-width: 600px; padding: 12px 20px; border-radius: 25px; border: 1px solid #ccc; font-size: 1em; outline: none; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .search-input:focus { border-color: var(--bitcoin); box-shadow: 0 0 8px rgba(247,147,26,0.3); }
         
+        /* Estilos dos Filtros */
         .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center; }
         button.filter-btn { padding: 8px 15px; border-radius: 20px; border: 1px solid var(--bitcoin); background: white; cursor: pointer; transition: 0.2s; }
         button.filter-btn.active, button.filter-btn:hover { background: var(--bitcoin); color: white; }
         
         /* Estilos do Grid e Cards */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; scroll-margin-top: 20px; }
         .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 4px solid var(--bitcoin); }
         .card a { color: var(--bitcoin); text-decoration: none; font-weight: bold; }
         .card a:hover { text-decoration: underline; }
@@ -29,9 +34,25 @@
         h3 { margin: 0 0 10px 0; color: #333; }
         p { font-size: 0.9em; margin: 5px 0; color: #555; }
         
+        /* Ajustes específicos para Celulares (Botão Flutuante) */
+        @media (max-width: 768px) {
+            .btn-pdf {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 9999;
+                padding: 12px 18px;
+                border-radius: 50px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                font-size: 15px;
+            }
+            .pdf-text { display: none; /* Esconde o texto longo no celular */ }
+            .btn-pdf::after { content: " PDF"; /* Adiciona um texto curto */ }
+        }
+
         /* Oculta controles na impressão do PDF */
         @media print {
-            .controls, .filters, .search-container { display: none; }
+            .controls, .filters, .search-container, .btn-pdf { display: none !important; }
             body { background: white; padding: 0; }
             .grid { display: block; }
             .card { break-inside: avoid; border: 1px solid #ccc; margin-bottom: 10px; box-shadow: none; }
@@ -43,7 +64,8 @@
 <div class="container">
     <div class="controls">
         <h1 style="margin:0;">📍 A Rota do Bitcoin</h1>
-        <button class="btn-pdf" onclick="window.print()">📥 Gerar PDF do Guia</button>
+        <!-- Ajustei a estrutura do botão para permitir a mudança do texto via CSS -->
+        <button class="btn-pdf" onclick="window.print()">📥 <span class="pdf-text">Gerar PDF do Guia</span></button>
     </div>
     
     <div class="search-container">
@@ -55,7 +77,6 @@
 </div>
 
 <script>
-    // Dados estruturados
     const estabelecimentos = [
         { "nome": "Viva Nawe", "categoria": "Turismo e Hospedagem", "end": "Rua das Hortensias, s/n. Bairro Paiol Grande. São Bento do Sapucai, Sp. Cep: 12490-000", "insta": "@viva.nawe" },
         { "nome": "Pico Agudo Sports", "categoria": "Turismo e Aventura", "end": "Av. Ministro Nelson HUngria-512", "insta": "picoagudosports" },
@@ -211,31 +232,26 @@
         { "nome": "Registro Civil e Tabelionato de notas de Santo Antônio do Pinhal", "categoria": "Cartorio", "end": "Rua expedito Costa manso, 193, Bairro Centro, Santo antonio", "insta": "Nao" }
     ];
 
-    // Função inteligente para formatar os links e contornar erros da planilha
     function formatInsta(instaRaw) {
         if (!instaRaw) return 'Não informado';
         
         let cleaned = instaRaw.trim();
         let lower = cleaned.toLowerCase();
         
-        // Verifica textos comuns de ausência ou invalidez na planilha
         const invalidos = ['não', 'nao', 'não tem', 'nao tem', 'não possui', 'não informado', 'instagram', 'nenhum', 'em desenvolvimento', 'vou pedir', 'ainda não tem', 'instagram, facebook'];
         if (invalidos.includes(lower)) {
             return cleaned; 
         }
         
-        // Se a pessoa preencheu com o site completo ou link misto
         if (lower.startsWith('http') || lower.startsWith('www') || lower.includes('.com') || lower.includes('.cc')) {
             let url = lower.startsWith('http') ? cleaned : 'https://' + cleaned;
             return `<a href="${url}" target="_blank">Acessar Site/Link</a>`;
         }
         
-        // Remove '@' iniciais para evitar duplicidade e constrói o link do IG
         let username = cleaned.replace(/^@+/, ''); 
         return `<a href="https://www.instagram.com/${username}" target="_blank">@${username}</a>`;
     }
 
-    // Variáveis de estado
     const grid = document.getElementById('grid');
     const filterDiv = document.getElementById('filters');
     const searchInput = document.getElementById('searchInput');
@@ -243,21 +259,17 @@
     let activeCategories = new Set(['Todos']);
     let searchQuery = '';
 
-    // Listener para a barra de pesquisa
     searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value.toLowerCase();
         render();
     });
 
-    // Função de renderização principal
     function render() {
         grid.innerHTML = '';
         
         const filtered = estabelecimentos.filter(item => {
-            // Verifica os filtros de categoria
             const matchCategory = activeCategories.has('Todos') || activeCategories.has(item.categoria);
             
-            // Verifica o texto de pesquisa (nome, categoria, endereço ou instagram)
             const searchStr = searchQuery;
             const matchSearch = searchStr === '' || 
                                 (item.nome && item.nome.toLowerCase().includes(searchStr)) || 
@@ -268,7 +280,6 @@
             return matchCategory && matchSearch;
         });
 
-        // Adiciona os cards resultantes na tela usando map (mais otimizado)
         grid.innerHTML = filtered.map(item => `
             <div class="card">
                 <div class="tag">${item.categoria}</div>
@@ -279,7 +290,6 @@
         `).join('');
     }
 
-    // Criar os botões de filtro dinamicamente
     const cats = ['Todos', ...new Set(estabelecimentos.map(i => i.categoria))];
     
     cats.forEach(cat => {
@@ -313,6 +323,10 @@
                 }
             }
             render();
+
+            if (window.innerWidth <= 768) {
+                document.getElementById('grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         };
         filterDiv.appendChild(btn);
     });

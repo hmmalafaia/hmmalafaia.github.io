@@ -85,3 +85,30 @@ async function converter(campo) {
 
 
 }
+
+
+function copiarDados() {
+    // Pega a data atual no formato dd/mm/yyyy
+    const hoje = new Date();
+    const dataFormatada = hoje.toLocaleDateString('pt-BR');
+
+    // Captura os valores dos campos pelos IDs
+    // .replace('.', ',') aplicado apenas no BTC conforme solicitado
+    const bitcoin = document.getElementById('bitcoin').value.replace('.', ',');
+    const satoshis = document.getElementById('satoshis').value;
+    const brl = document.getElementById('brl').value;
+    const usd = document.getElementById('usd').value;
+    const inputUSD = document.getElementById('inputUSD').value;
+    const btcUsd = document.getElementById('btcUsd').value;
+    const btcBrl = document.getElementById('btcBrl').value;
+
+    // Monta a string unindo tudo com TAB (\t)
+    const textoParaCopiar = `${dataFormatada}\t${bitcoin}\t${satoshis}\t${brl}\t${usd}\t${inputUSD}\t${btcUsd}\t${btcBrl}`;
+
+    // Executa a cópia
+    navigator.clipboard.writeText(textoParaCopiar).then(() => {
+        alert("Dados copiados com sucesso!");
+    }).catch(err => {
+        console.error('Erro ao copiar: ', err);
+    });
+}

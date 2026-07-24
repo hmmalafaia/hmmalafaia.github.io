@@ -3,48 +3,29 @@ async function buscaPreco() {
     const btcUsdInput = document.getElementById('inputUSD');
 
     try {
+        // Busca o preço do Bitcoin em BRL e USD na mesma requisição
         const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=brl,usd');
         const data = await response.json();
-        const bitcoinPriceBRL
-            = data.bitcoin.brl;
+        
+        const bitcoinPriceBRL = data.bitcoin.brl;
+        const bitcoinPriceUSD = data.bitcoin.usd;
 
-        const bitcoinPriceUSD
-            = data.bitcoin.usd;
-
-
-        btcBrlValue = bitcoinPriceBRL;
-        btcBrl.value = btcBrlValue;
+        // Atualiza o campo de preço do BTC em BRL
+        btcBrl.value = bitcoinPriceBRL;
         btcBrl.disabled = true;
 
-        btcUsdValue = bitcoinPriceUSD;
-        btcUsd.value = btcUsdValue;
-        btcUsd.disabled = true;
+        // Calcula o preço do Dólar em Reais (BRL por 1 USD) de forma precisa
+        // Fórmula: Preço do BTC em BRL / Preço do BTC em USD = Valor de 1 USD em BRL
+        const brlUsdRate = bitcoinPriceBRL / bitcoinPriceUSD;
 
-    } catch (error) {
-        console.error('Error fetching Bitcoin price in BRL:', error);
-        btcBrl.value = -1;
-        btcUsdInput.value = -1;
-
-    }
-
-    try {
-        setTimeout(function () {
-        }, 1500);
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=brl');
-        const data = await response.json();
-        const BRLusdPrice
-            = data.usd.brl;
-
-        btcUsdInput.value = BRLusdPrice;
+        btcUsdInput.value = brlUsdRate.toFixed(4); // Ex: ~5.40 (dependendo da cotação atual)
         btcUsdInput.disabled = true;
 
-
     } catch (error) {
-        console.error('Error fetching Bitcoin price in BRL:', error);
-        labelElement.value = -1;
-
+        console.error('Erro ao buscar os preços:', error);
+        btcBrl.value = -1;
+        btcUsdInput.value = -1;
     }
-
 }
 
 

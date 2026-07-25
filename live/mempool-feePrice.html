@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: transparent;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      gap: 45px; /* Ajuste este valor no OBS para espaçar perfeitamente nos 3 quadrados */
+      color: #ffffff;
+    }
+    
+    .fee-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 130px; /* Largura de cada bloco */
+    }
+    
+    .value-container {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    
+    .value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255, 153, 0, 0.5); /* Brilho Laranja */
+    }
+    
+    .unit {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ff9900; /* Laranja Bitcoin */
+    }
+
+    /* Nova Linha Separadora */
+    .divider {
+      width: 80%;
+      height: 1px;
+      background-color: rgba(255, 255, 255, 0.2);
+      margin: 6px 0;
+    }
+
+    /* Novo Valor em Dólar */
+    .fiat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #4ade80; /* Verde estilo financeiro igual ao seu print */
+      text-shadow: 0 0 8px rgba(74, 222, 128, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Baixa Prioridade -->
+  <div class="fee-card">
+    <div class="value-container">
+      <span id="low-fee" class="value">--</span>
+      <span class="unit">sat/vB</span>
+    </div>
+    <div class="divider"></div>
+    <div class="fiat-value" id="low-usd">$0.00</div>
+  </div>
+
+  <!-- Média Prioridade -->
+  <div class="fee-card">
+    <div class="value-container">
+      <span id="med-fee" class="value">--</span>
+      <span class="unit">sat/vB</span>
+    </div>
+    <div class="divider"></div>
+    <div class="fiat-value" id="med-usd">$0.00</div>
+  </div>
+
+  <!-- Alta Prioridade -->
+  <div class="fee-card">
+    <div class="value-container">
+      <span id="high-fee" class="value">--</span>
+      <span class="unit">sat/vB</span>
+    </div>
+    <div class="divider"></div>
+    <div class="fiat-value" id="high-usd">$0.00</div>
+  </div>
+
+  <script>
+    // Tamanho padrão de uma transação SegWit comum (1 input, 2 outputs)
+    const TX_SIZE_VBYTES = 140; 
+
+    async function updateMempoolFees() {
+      try {
+        // Dispara as duas requisições ao mesmo tempo para ser mais rápido
+        const [blocksResponse, priceResponse] = await Promise.all([
+          fetch('https://mempool.space/api/v1/fees/mempool-blocks'),
+          fetch('https://mempool.space/api/v1/prices')
+        ]);
+
+        const blocks = await blocksResponse.json();
+        const prices = await priceResponse.json();
+        
+        const btcPriceUsd = prices.USD;
+
+        // Pega as taxas fracionadas
+        const highFee = blocks.length > 0 ? blocks[0].medianFee : 1.0;
+        const medFee  = blocks.length > 1 ? blocks[1].medianFee : 1.0;
+        const lowFee  = blocks.length > 2 ? blocks[2].medianFee : 1.0;
+
+        // Atualiza a tela com sat/vB
+        document.getElementById('high-fee').innerText = highFee.toFixed(1);
+        document.getElementById('med-fee').innerText  = medFee.toFixed(1);
+        document.getElementById('low-fee').innerText  = lowFee.toFixed(1);
+
+        // Calcula o custo em Dólar: (taxa * 140 vBytes) transformado em BTC * Preço do BTC
+        const calcUsd = (feeSat) => ((feeSat * TX_SIZE_VBYTES) / 100000000) * btcPriceUsd;
+
+        // Atualiza a tela com o Dólar (com 2 casas decimais)
+        document.getElementById('high-usd').innerText = '$' + calcUsd(highFee).toFixed(2);
+        document.getElementById('med-usd').innerText  = '$' + calcUsd(medFee).toFixed(2);
+        document.getElementById('low-usd').innerText  = '$' + calcUsd(lowFee).toFixed(2);
+        
+      } catch (error) {
+        console.error("Erro ao buscar dados da Mempool:", error);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      updateMempoolFees();
+      setInterval(updateMempoolFees, 10000); 
+    });
+  </script>
+</body>
+</html>

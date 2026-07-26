@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora: Carro Próprio vs Uber</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .calculator {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+        h3 {
+            color: #555;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            font-size: 1.1rem;
+            margin-top: 25px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #resultado {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            display: none;
+            color: #333;
+            line-height: 1.5;
+        }
+        .destaque {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #28a745;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .alerta {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <h2>Comparador de Transporte</h2>
+
+        <!-- Veículo Próprio -->
+        <h3>Veículo Próprio</h3>
+        <div class="form-group">
+            <label>Distância Total (Ida e Volta em KM):</label>
+            <input type="number" id="distancia" placeholder="Ex: 25.5" step="0.1">
+        </div>
+        <div class="form-group">
+            <label>Custo por KM (Combustível + Desgaste) (R$):</label>
+            <input type="number" id="custoKm" placeholder="Ex: 0.80" step="0.01">
+        </div>
+        <div class="form-group">
+            <label>Custo do Estacionamento (R$):</label>
+            <input type="number" id="estacionamento" placeholder="Ex: 15.00" step="0.01">
+        </div>
+
+        <!-- Uber -->
+        <h3>Aplicativo (Uber/99)</h3>
+        <div class="form-group">
+            <label>Custo Estimado - Ida (R$):</label>
+            <input type="number" id="uberIda" placeholder="Ex: 22.50" step="0.01">
+        </div>
+        <div class="form-group">
+            <label>Custo Estimado - Volta (R$):</label>
+            <input type="number" id="uberVolta" placeholder="Ex: 25.00" step="0.01">
+        </div>
+
+        <button onclick="calcular()">Comparar Custos</button>
+
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        function calcular() {
+            // Obtendo valores dos inputs
+            const distancia = parseFloat(document.getElementById('distancia').value) || 0;
+            const custoKm = parseFloat(document.getElementById('custoKm').value) || 0;
+            const estacionamento = parseFloat(document.getElementById('estacionamento').value) || 0;
+            
+            const uberIda = parseFloat(document.getElementById('uberIda').value) || 0;
+            const uberVolta = parseFloat(document.getElementById('uberVolta').value) || 0;
+
+            // Cálculos Totais
+            const totalCarro = (distancia * custoKm) + estacionamento;
+            const totalUber = uberIda + uberVolta;
+
+            const divResultado = document.getElementById('resultado');
+            divResultado.style.display = 'block';
+
+            // Verificação de segurança se os campos estiverem vazios
+            if (totalCarro === 0 && totalUber === 0) {
+                divResultado.innerHTML = "Por favor, insira os valores para calcular.";
+                return;
+            }
+
+            // Construção da string de resposta
+            let html = `Custo Veículo Próprio: <strong>R$ ${totalCarro.toFixed(2)}</strong><br>`;
+            html += `Custo Total Uber: <strong>R$ ${totalUber.toFixed(2)}</strong><br><hr style="border:0; border-top:1px solid #ccc; margin: 15px 0;">`;
+
+            // Lógica de Comparação
+            if (totalCarro < totalUber) {
+                const economia = totalUber - totalCarro;
+                const percentualEconomia = (economia / totalUber) * 100;
+                
+                html += `<span class="destaque">🚗 Veículo próprio é mais vantajoso!</span>`;
+                html += `Nesta escolha, você economiza <strong>R$ ${economia.toFixed(2)}</strong>.<br><br>`;
+                html += `O carro representa um custo <strong>${percentualEconomia.toFixed(1)}% menor</strong> em relação ao Uber.<br>`;
+                html += `<span style="font-size: 0.85rem; color: #666;">(Se você escolhesse o Uber, teria um prejuízo percentual equivalente a esta taxa em relação ao valor mais alto).</span>`;
+            
+            } else if (totalUber < totalCarro) {
+                const economia = totalCarro - totalUber;
+                const percentualEconomia = (economia / totalCarro) * 100;
+                
+                html += `<span class="destaque">📱 O Uber é mais vantajoso!</span>`;
+                html += `Nesta escolha, você economiza <strong>R$ ${economia.toFixed(2)}</strong>.<br><br>`;
+                html += `O Uber representa um custo <strong>${percentualEconomia.toFixed(1)}% menor</strong> em relação a ir de carro.<br>`;
+                html += `<span style="font-size: 0.85rem; color: #666;">(Se você escolhesse ir de carro, teria um prejuízo percentual equivalente a esta taxa em relação ao valor mais alto).</span>`;
+            
+            } else {
+                html += `<span class="destaque" style="color: #6c757d;">⚖️ Empate!</span>`;
+                html += `Financeiramente, ambas as opções têm exatamente o mesmo custo. A escolha pode ser feita por conveniência.`;
+            }
+
+            divResultado.innerHTML = html.replace(/\./g, ','); // Troca ponto por vírgula para padrão BR
+        }
+    </script>
+</body>
+</html>

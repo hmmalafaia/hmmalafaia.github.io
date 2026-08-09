@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Pré-Aula - Bitcoin Amantikir</title>
+    <style>
+        :root {
+            /* Inspirado nas cores tradicionais da comunidade Bitcoin */
+            --btc-orange: #f7931a;
+            --btc-orange-hover: #e07b11;
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --border-color: #333333;
+            --success-green: #2ecc71;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 750px;
+            width: 100%;
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border-top: 5px solid var(--btc-orange);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        h1 {
+            color: var(--btc-orange);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+        .tab-btn {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 2px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            max-width: 200px;
+            justify-content: center;
+        }
+        .tab-btn:hover {
+            border-color: var(--btc-orange);
+            background-color: rgba(247, 147, 26, 0.05);
+        }
+        .tab-btn.active {
+            background-color: var(--btc-orange);
+            border-color: var(--btc-orange);
+            color: #fff;
+        }
+        .content-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .content-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .step {
+            background-color: rgba(255,255,255,0.03);
+            border-left: 4px solid var(--btc-orange);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 0 8px 8px 0;
+            transition: transform 0.2s;
+        }
+        .step:hover {
+            background-color: rgba(255,255,255,0.06);
+            transform: translateX(4px);
+        }
+        .step-number {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            color: var(--btc-orange);
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+        .step p {
+            font-size: 1.05rem;
+        }
+        .step a {
+            color: var(--btc-orange);
+            text-decoration: none;
+            font-weight: 600;
+            word-break: break-all;
+            display: inline-flex;
+            align-items: center;
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(247, 147, 26, 0.1);
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        .step a:hover {
+            background: rgba(247, 147, 26, 0.2);
+        }
+        .sub-steps {
+            margin-top: 1rem;
+            padding-left: 0;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .sub-steps li {
+            background-color: #252525;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            color: #d1d5db;
+            border: 1px solid #333;
+        }
+        .sub-steps li::before {
+            content: '📎';
+            margin-right: 10px;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .tabs {
+                flex-direction: column;
+            }
+            .tab-btn {
+                max-width: 100%;
+            }
+            .container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>O que você precisa fazer antes da primeira aula?</h1>
+            <p class="subtitle">Selecione o dispositivo que você vai usar para acompanhar o curso.</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'desktop')">
+                <span>💻</span> Computador
+            </button>
+            <button class="tab-btn" onclick="switchTab(event, 'mobile')">
+                <span>📱</span> Celular
+            </button>
+        </div>
+
+        <!-- Seção Computador -->
+        <div id="desktop" class="content-section active">
+            <div class="step">
+                <div class="step-number">Passo 1</div>
+                <p>Acesse o site oficial da Sparrow Wallet:</p>
+                <a href="https://sparrowwallet.com/download/" target="_blank">🌐 sparrowwallet.com/download/</a>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">Passo 2</div>
+                <p>Faça o Download da <strong>Sparrow Desktop</strong> na versão mais recente compatível com o seu sistema operacional (Windows, Mac ou Linux).</p>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">Passo 3</div>
+                <p>Role a página para baixo e faça o download dos arquivos de verificação abaixo (usaremos eles na aula para checar a autenticidade):</p>
+                <ul class="sub-steps">
+                    <li>3.1 Manifest Signature: sparrow-2.5.3-manifest.txt.asc</li>
+                    <li>3.2 Manifest: sparrow-2.5.3-manifest.txt</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Seção Celular -->
+        <div id="mobile" class="content-section">
+            <div class="step">
+                <div class="step-number">Passo 1</div>
+                <p>Acesse o site oficial da Blue Wallet:</p>
+                <a href="https://bluewallet.io/" target="_blank">🌐 bluewallet.io</a>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">Passo 2</div>
+                <p>Faça o Download da <strong>Blue Wallet</strong> na loja de aplicativos do seu celular (App Store ou Google Play).</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(event, tabId) {
+            // Remove a classe 'active' de todos os botões e seções
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            
+            // Adiciona a classe 'active' ao botão clicado e à seção correspondente
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>

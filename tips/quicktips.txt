@@ -1,0 +1,13 @@
+To add a blank margin around your QR code, use the -m flag followed by a number.
+qrencode -m 10 -o qr_with_margin.png "Your text here"
+
+If you are trying to keep a specific pixel size, remember that the margin is multiplied by your module size (-s).
+For example, if you use -s 10 (each dot is 10 pixels) and -m 5 (a margin of 5 dots):
+Your margin will be 50 pixels thick on all four sides.
+Here is an example combining both:
+
+qrencode -s 10 -m 5 -o my_qr.png "https://example.com"
+
+
+adjust str filename
+for f in *.en.srt; do [ -f "$f" ] && { lsof "$f" >/dev/null 2>&1 && echo "Pulando '$f' (arquivo ocupado)" || mv "$f" "${f%.en.srt}.srt"; }; done

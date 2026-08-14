@@ -14,6 +14,10 @@ async function buscaPreco() {
         btcBrl.value = bitcoinPriceBRL;
         btcBrl.disabled = true;
 
+        // Atualiza o campo de preço do BTC em USD
+        btcUsdInput.value = bitcoinPriceUSD;
+        btcUsdInput.disabled = true;
+
         // Calcula o preço do Dólar em Reais (BRL por 1 USD) de forma precisa
         // Fórmula: Preço do BTC em BRL / Preço do BTC em USD = Valor de 1 USD em BRL
         const brlUsdRate = bitcoinPriceBRL / bitcoinPriceUSD;

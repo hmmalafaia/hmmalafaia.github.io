@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropia: Don't Trust, Verify</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #f0f0f0;
+            --box-black: #1a1a1a;
+            --box-transparent: rgba(255, 255, 255, 0.1);
+            --accent: #f7931a; /* Laranja remetendo à criptografia/Bitcoin */
+            --danger: #ff4757;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 2rem 1rem;
+            max-width: 800px;
+        }
+
+        h1 { margin-bottom: 0.5rem; color: var(--accent); }
+        p.subtitle { color: #aaa; line-height: 1.5; }
+
+        .stage-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            background-color: #333;
+            color: white;
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover { background-color: #444; }
+        button.active { border-color: var(--accent); background-color: #222; }
+        
+        .action-btn {
+            background-color: var(--accent);
+            color: #121212;
+            font-size: 1.2rem;
+            padding: 15px 30px;
+            margin-top: 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(247, 147, 26, 0.3);
+        }
+        .action-btn:hover { background-color: #e68315; transform: scale(1.05); }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .box-area {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
+            transition: all 0.5s ease;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .box-area.black-box {
+            background-color: var(--box-black);
+            border: 4px solid #333;
+            box-shadow: inset 0 0 50px #000;
+        }
+
+        .box-area.glass-box {
+            background-color: var(--box-transparent);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .box-content { display: none; }
+        .glass-box .box-content { 
+            display: block; 
+            animation: fadeIn 1s;
+        }
+
+        .code-bug {
+            font-family: monospace;
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff7675;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .output-area {
+            display: flex;
+            gap: 15px;
+            min-height: 100px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+            width: 100%;
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+        }
+
+        .item-spawned {
+            background: white;
+            color: black;
+            font-size: 2rem;
+            font-weight: bold;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: popOut 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .item-spawned.word {
+            width: auto;
+            padding: 0 20px;
+            font-size: 1.2rem;
+            background: #2c3e50;
+            color: white;
+            border: 2px solid var(--accent);
+        }
+
+        /* Animations */
+        @keyframes popOut {
+            0% { transform: scale(0) translateY(-50px) rotate(-180deg); opacity: 0; }
+            100% { transform: scale(1) translateY(0) rotate(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .hidden { display: none !important; }
+        
+        .stage-description {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-left: 4px solid var(--accent);
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Entropia & Verificação</h1>
+        <p class="subtitle">Entendendo a geração de dados e por que não devemos confiar cegamente em saídas digitais.</p>
+    </header>
+
+    <div class="stage-nav">
+        <button id="btn-stage-1" class="active" onclick="setStage(1)">1. Caixa Preta (Dado)</button>
+        <button id="btn-stage-2" onclick="setStage(2)">2. O Truque</button>
+        <button id="btn-stage-3" onclick="setStage(3)">3. O Bug (Transparente)</button>
+        <button id="btn-stage-4" onclick="setStage(4)">4. Entropia BIP39</button>
+    </div>
+
+    <div class="container">
+        
+        <div id="stage-info" class="stage-description">
+            <!-- Descrição injetada via JS -->
+        </div>
+
+        <div id="main-box" class="box-area black-box">
+            <div id="box-internals" class="box-content">
+                <!-- Conteúdo interno da caixa transparente injetado via JS -->
+            </div>
+        </div>
+
+        <button class="action-btn" id="generate-btn" onclick="generate()">Cuspir Dado!</button>
+
+        <div class="output-area" id="output">
+            <!-- Itens gerados aparecerão aqui -->
+        </div>
+
+    </div>
+
+    <script>
+        let currentStage = 1;
+
+        // Dicionário BIP39 simplificado (amostra com 20 palavras para o exemplo)
+        const bip39Words = [
+            "abandon", "ability", "beacon", "biscuit", "cabbage", "cactus",
+            "damp", "dance", "fabric", "face", "gadget", "galaxy",
+            "habit", "hair", "ice", "icon", "jacket", "jaguar", "kangaroo", "keep"
+        ];
+
+        const stages = {
+            1: {
+                title: "Etapa 1: A Caixa Preta",
+                desc: "Esta caixa parece gerar números de 1 a 6 aleatoriamente. Como está fechada, você só pode observar o <i>output</i>. Clique para gerar e observe o padrão.",
+                boxStyle: "black-box",
+                btnText: "Cuspir Dado!",
+                internals: "",
+                generator: () => Math.floor(Math.random() * 3) + 1, // Gera 1, 2 ou 3
+                isWord: false
+            },
+            2: {
+                title: "Etapa 2: A Caixa Transparente (O Dado Viciado)",
+                desc: "<b>Don't Trust, Verify!</b> Ao abrir a caixa, descobrimos que não há dados de 6 faces aqui. O gerador físico só possui faces 1, 2 e 3. O <i>output</i> digital não refletia a realidade que esperávamos.",
+                boxStyle: "glass-box",
+                btnText: "Cuspir Dado!",
+                internals: "<h3>Mecanismo Revelado:</h3><p>🎲 Dados com apenas 3 faces (1, 2, 3).</p><p style='color: var(--danger)'>NUNCA sairá 4, 5 ou 6.</p>",
+                generator: () => Math.floor(Math.random() * 3) + 1, // Gera 1, 2 ou 3
+                isWord: false
+            },
+            3: {
+                title: "Etapa 3: O Bug de Programação",
+                desc: "Aqui a caixa é transparente e você VÊ que há dados perfeitos de 6 faces dentro. A entropia física é boa. Mas o mecanismo que <i>entrega</i> o dado para você tem um erro lógico.",
+                boxStyle: "glass-box",
+                btnText: "Cuspir Dado!",
+                internals: "<h3>Mecanismo Revelado:</h3><p>🎲 Dados perfeitos de 6 faces.</p><div class='code-bug'>// Erro do programador:<br>if (resultado % 2 == 0) {<br>&nbsp;&nbsp;ignorar();<br>}</div><p>Só deixa passar ímpares!</p>",
+                generator: () => {
+                    const impares = [1, 3, 5];
+                    return impares[Math.floor(Math.random() * impares.length)];
+                },
+                isWord: false
+            },
+            4: {
+                title: "Etapa 4: A Caixa Preta BIP39",
+                desc: "O mesmo princípio se aplica à geração de chaves. Esta caixa afirma escolher palavras aleatórias de um dicionário de 2048 palavras. Se a caixa for fechada (software de código fechado), como garantir que ela não está escolhendo palavras de uma lista viciada de apenas 10 opções?",
+                boxStyle: "black-box",
+                btnText: "Sortear Palavra BIP39",
+                internals: "",
+                generator: () => bip39Words[Math.floor(Math.random() * bip39Words.length)],
+                isWord: true
+            }
+        };
+
+        function setStage(stageNum) {
+            currentStage = stageNum;
+            const stageData = stages[stageNum];
+
+            // Atualiza botões
+            document.querySelectorAll('.stage-nav button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-stage-${stageNum}`).classList.add('active');
+
+            // Atualiza Textos
+            document.getElementById('stage-info').innerHTML = `<h2>${stageData.title}</h2><p>${stageData.desc}</p>`;
+            document.getElementById('generate-btn').innerText = stageData.btnText;
+            
+            // Atualiza Caixa
+            const box = document.getElementById('main-box');
+            box.className = `box-area ${stageData.boxStyle}`;
+            
+            const internals = document.getElementById('box-internals');
+            internals.innerHTML = stageData.internals;
+
+            // Limpa output anterior
+            document.getElementById('output').innerHTML = '';
+        }
+
+        function generate() {
+            const stageData = stages[currentStage];
+            const result = stageData.generator();
+            
+            const outputArea = document.getElementById('output');
+            
+            const newItem = document.createElement('div');
+            newItem.className = `item-spawned ${stageData.isWord ? 'word' : ''}`;
+            newItem.innerText = result;
+
+            outputArea.prepend(newItem);
+
+            // Mantém apenas os últimos 10 elementos para não poluir a tela
+            if (outputArea.children.length > 12) {
+                outputArea.removeChild(outputArea.lastChild);
+            }
+        }
+
+        // Inicia na Etapa 1
+        window.onload = () => setStage(1);
+    </script>
+</body>
+</html>

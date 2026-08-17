@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PoC - Onde Encontrar | Lojas de Conveniência no RJ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .pin {
+      transition: transform 0.2s ease, fill 0.2s ease;
+      cursor: pointer;
+    }
+    .pin:hover, .pin.active {
+      transform: scale(1.4);
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Header / Navbar -->
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="bg-amber-500 p-2 rounded-lg text-slate-950 font-bold">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-white tracking-wide">FindMyProduct</h1>
+          <p class="text-xs text-slate-400">PoC: Localizador de Lojas de Conveniência - RJ</p>
+        </div>
+      </div>
+
+      <!-- Campo de Busca -->
+      <div class="relative flex-1 max-w-md">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="searchInput"
+          placeholder="Busque por bairro ou endereço (ex: Tijuca, Copacabana)..." 
+          class="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm focus:outline-none focus:border-amber-500 text-slate-100 placeholder-slate-400 shadow-inner"
+        >
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- Painel Lateral: Lista de Lojas -->
+    <section class="lg:col-span-1 bg-slate-950/50 border border-slate-800 rounded-2xl p-4 flex flex-col h-[600px]">
+      <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+        <h2 class="font-semibold text-slate-200">Lojas Encontradas</h2>
+        <span id="storeCount" class="text-xs bg-amber-500/20 text-amber-400 font-medium px-2.5 py-0.5 rounded-full border border-amber-500/30">
+          10 pontos
+        </span>
+      </div>
+
+      <!-- Filtros Rápidos -->
+      <div class="flex gap-2 mb-4 overflow-x-auto pb-2 text-xs scrollbar-none">
+        <button onclick="filterByBairro('todos')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Todos</button>
+        <button onclick="filterByBairro('Tijuca')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Tijuca</button>
+        <button onclick="filterByBairro('Copacabana')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Copacabana</button>
+        <button onclick="filterByBairro('Barra da Tijuca')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap">Barra</button>
+      </div>
+
+      <!-- Lista Scrollável -->
+      <div id="storeList" class="flex-1 overflow-y-auto space-y-3 pr-1">
+        <!-- Injetado via JS -->
+      </div>
+    </section>
+
+    <!-- Visualizador do Mapa SVG -->
+    <section class="lg:col-span-2 bg-slate-950/50 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden min-h-[500px]">
+      
+      <!-- Popover de Destaque (Hover/Selection) -->
+      <div id="tooltip" class="absolute top-6 left-6 z-20 bg-slate-900/90 border border-slate-700 backdrop-blur-md p-4 rounded-xl shadow-2xl max-w-xs transition-all opacity-0 pointer-events-none">
+        <span id="tooltipBairro" class="text-xs font-bold text-amber-400 uppercase tracking-wider">Bairro</span>
+        <h3 id="tooltipNome" class="font-bold text-slate-100 text-base leading-tight mt-0.5">Nome da Loja</h3>
+        <p id="tooltipEnd" class="text-xs text-slate-300 mt-1">Endereço completo da loja aqui.</p>
+        <div class="mt-3 pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+          <span>Status: <strong class="text-emerald-400">Estoque Confirmado</strong></span>
+        </div>
+      </div>
+
+      <!-- SVG da Cidade do Rio de Janeiro (Simplificado para PoC) -->
+      <div class="w-full h-full flex items-center justify-center relative">
+        <svg id="mapSvg" viewBox="0 0 1000 600" class="w-full h-full max-h-[550px] drop-shadow-[0_10px_25px_rgba(0,0,0,0.5)]">
+          <!-- Mar / Océano -->
+          <rect width="1000" height="600" fill="#0f172a" rx="16" />
+          
+          <!-- Contornos das Zonas do RJ (Representação Vetorial Schemática) -->
+          <g id="regioes" class="stroke-slate-900 stroke-[2] fill-slate-800/80">
+            <!-- Zona Oeste / Campo Grande / Bangu -->
+            <path d="M 50,150 L 350,120 L 400,300 L 250,450 L 50,400 Z" class="hover:fill-slate-700/80 transition-colors" data-zona="Zona Oeste" />
+            <!-- Barra da Tijuca / Recreio -->
+            <path d="M 250,450 L 400,300 L 600,350 L 550,500 L 250,480 Z" class="hover:fill-slate-700/80 transition-colors" data-zona="Barra e Jacarepaguá" />
+            <!-- Zona Norte (Tijuca, Suburbana, Madureira) -->
+            <path d="M 350,120 L 700,100 L 750,280 L 600,350 L 400,300 Z" class="hover:fill-slate-700/80 transition-colors" data-zona="Zona Norte" />
+            <!-- Centro e Porto -->
+            <path d="M 700,100 L 850,120 L 820,250 L 750,280 Z" class="hover:fill-slate-700/80 transition-colors" data-zona="Centro" />
+            <!-- Zona Sul (Copacabana, Ipanema, Botafogo) -->
+            <path d="M 750,280 L 820,250 L 880,350 L 700,450 L 600,350 Z" class="hover:fill-slate-700/80 transition-colors" data-zona="Zona Sul" />
+          </g>
+
+          <!-- Rótulos Geográficos de Referência -->
+          <g class="fill-slate-500 text-[14px] font-semibold pointer-events-none select-none">
+            <text x="180" y="280">ZONA OESTE</text>
+            <text x="370" y="420">BARRA DA TIJUCA</text>
+            <text x="500" y="220">ZONA NORTE</text>
+            <text x="750" y="180">CENTRO</text>
+            <text x="710" y="360">ZONA SUL</text>
+          </g>
+
+          <!-- Marcadores das Lojas (Injetados dinamicamente via JS) -->
+          <g id="pinsGroup"></g>
+        </svg>
+      </div>
+
+      <!-- Legenda do Mapa -->
+      <div class="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800/80">
+        <div class="flex items-center space-x-4">
+          <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block mr-1.5"></span> Loja de Conveniência</span>
+          <span class="flex items-center"><span class="w-3 h-3 rounded-full bg-slate-700 inline-block mr-1.5"></span> Limite do Bairro/Região</span>
+        </div>
+        <span>Passe o mouse nos marcadores para detalhes</span>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Base de dados mockada com 10 pontos na cidade do Rio de Janeiro
+    const stores = [
+      { id: 1, nome: "ConvenioStore - Praça Saens Peña", bairro: "Tijuca", endereco: "Praça Saens Peña, 45", x: 520, y: 260 },
+      { id: 2, nome: "Conveniência Posto Maracanã", bairro: "Maracanã", endereco: "Av. Maracanã, 800", x: 580, y: 240 },
+      { id: 3, nome: "Stop & Shop Copacabana", bairro: "Copacabana", endereco: "Av. Atlântica, 1820", x: 760, y: 380 },
+      { id: 4, nome: "Point Express Botafogo", bairro: "Botafogo", endereco: "Rua Voluntários da Pátria, 210", x: 730, y: 320 },
+      { id: 5, nome: "Conveniência Central do Brasil", bairro: "Centro", endereco: "Praça da República, 12", x: 760, y: 200 },
+      { id: 6, nome: "Barra Market 24h", bairro: "Barra da Tijuca", endereco: "Av. das Américas, 4600", x: 420, y: 400 },
+      { id: 7, nome: "Jardim Oceânico Express", bairro: "Barra da Tijuca", endereco: "Av. Armando Lombardi, 350", x: 490, y: 430 },
+      { id: 8, nome: "Norte Grid Conveniência", bairro: "Méier", endereco: "Rua Dias da Cruz, 140", x: 480, y: 190 },
+      { id: 9, nome: "Convenient Ipanema", bairro: "Ipanema", endereco: "Rua Visconde de Pirajá, 305", x: 730, y: 410 },
+      { id: 10, nome: "Lojas de Conveniência Recreio", bairro: "Recreio", endereco: "Av. Lúcio Costa, 16300", x: 310, y: 440 }
+    ];
+
+    const pinsGroup = document.getElementById('pinsGroup');
+    const storeList = document.getElementById('storeList');
+    const searchInput = document.getElementById('searchInput');
+    const tooltip = document.getElementById('tooltip');
+
+    // Inicializa a renderização dos elementos
+    function init() {
+      renderMapPins(stores);
+      renderStoreList(stores);
+
+      // Event listener para o campo de busca
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = stores.filter(store => 
+          store.bairro.toLowerCase().includes(query) || 
+          store.nome.toLowerCase().includes(query) ||
+          store.endereco.toLowerCase().includes(query)
+        );
+        
+        renderMapPins(filtered);
+        renderStoreList(filtered);
+        document.getElementById('storeCount').textContent = `${filtered.length} pontos`;
+      });
+    }
+
+    // Desenha os marcadores SVG
+    function renderMapPins(items) {
+      pinsGroup.innerHTML = '';
+      items.forEach(store => {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", "pin");
+        g.setAttribute("id", `pin-${store.id}`);
+        
+        // Círculo externo pulsante
+        const pulse = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        pulse.setAttribute("cx", store.x);
+        pulse.setAttribute("cy", store.y);
+        pulse.setAttribute("r", "12");
+        pulse.setAttribute("class", "fill-amber-500/30 animate-ping");
+
+        // Pin Principal
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", store.x);
+        circle.setAttribute("cy", store.y);
+        circle.setAttribute("r", "7");
+        circle.setAttribute("class", "fill-amber-500 stroke-slate-950 stroke-2 shadow-lg");
+
+        g.appendChild(pulse);
+        g.appendChild(circle);
+
+        // Eventos de Hover e Clique
+        g.addEventListener('mouseenter', () => highlightStore(store, true));
+        g.addEventListener('mouseleave', () => highlightStore(store, false));
+        g.addEventListener('click', () => selectStoreCard(store.id));
+
+        pinsGroup.appendChild(g);
+      });
+    }
+
+    // Desenha os cards na barra lateral
+    function renderStoreList(items) {
+      storeList.innerHTML = '';
+      if (items.length === 0) {
+        storeList.innerHTML = `<p class="text-xs text-slate-500 text-center py-8">Nenhuma loja encontrada para a busca.</p>`;
+        return;
+      }
+
+      items.forEach(store => {
+        const card = document.createElement('div');
+        card.id = `card-${store.id}`;
+        card.className = "p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-amber-500/50 transition-all cursor-pointer group";
+        
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <span class="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-wider">${store.bairro}</span>
+          </div>
+          <h4 class="font-semibold text-slate-200 text-sm mt-1.5 group-hover:text-amber-400 transition-colors">${store.nome}</h4>
+          <p class="text-xs text-slate-400 mt-1">${store.endereco}</p>
+        `;
+
+        card.addEventListener('mouseenter', () => highlightStore(store, true));
+        card.addEventListener('mouseleave', () => highlightStore(store, false));
+
+        storeList.appendChild(card);
+      });
+    }
+
+    // Ativa destaques visuais cruzados entre Lista e Mapa
+    function highlightStore(store, isHovered) {
+      const pin = document.getElementById(`pin-${store.id}`);
+      const card = document.getElementById(`card-${store.id}`);
+
+      if (isHovered) {
+        if(pin) pin.classList.add('active');
+        if(card) card.classList.add('border-amber-500', 'bg-slate-800/80');
+
+        // Atualiza e exibe o Tooltip
+        document.getElementById('tooltipBairro').textContent = store.bairro;
+        document.getElementById('tooltipNome').textContent = store.nome;
+        document.getElementById('tooltipEnd').textContent = store.endereco;
+        tooltip.classList.remove('opacity-0');
+      } else {
+        if(pin) pin.classList.remove('active');
+        if(card) card.classList.remove('border-amber-500', 'bg-slate-800/80');
+        tooltip.classList.add('opacity-0');
+      }
+    }
+
+    function selectStoreCard(id) {
+      const card = document.getElementById(`card-${id}`);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // Filtro rápido pelos botões de categoria
+    function filterByBairro(bairro) {
+      if (bairro === 'todos') {
+        searchInput.value = '';
+      } else {
+        searchInput.value = bairro;
+      }
+      searchInput.dispatchEvent(new Event('input'));
+    }
+
+    // Executa no carregamento da página
+    window.onload = init;
+  </script>
+</body>
+</html>

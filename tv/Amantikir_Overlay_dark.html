@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Archivo+Black&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; width: 1920px; height: 1080px; overflow: hidden; }
+  body { background: #04120F; }
+  a { color: #F5911F; text-decoration: none; }
+  a:hover { color: #FFB55C; }
+  @keyframes livePulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.82); } }
+</style>
+</helmet>
+<div style="position:relative;width:1920px;height:1080px;overflow:hidden;background:radial-gradient(120% 90% at 50% 0%, #10403A 0%, #082520 55%, #04150F 100%);font-family:Archivo, system-ui, sans-serif;color:#F6F0E5;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px">
+
+  <div style="position:absolute;inset:0;opacity:.5;background:repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 2px, rgba(0,0,0,0) 2px 4px);pointer-events:none"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:180px;background:#05201B;clip-path:polygon(0 100%,0 62%,9% 30%,17% 58%,27% 14%,38% 55%,47% 33%,58% 66%,69% 22%,79% 57%,88% 35%,100% 68%,100% 100%);opacity:.55;pointer-events:none"></div>
+
+  <!-- TOP BAR -->
+  <div style="position:relative;display:flex;align-items:center;gap:24px;height:88px;flex:none">
+    <div style="display:flex;align-items:center;gap:16px;padding:0 24px 0 0">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(160deg,#F79A2B,#E0700F);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(224,112,15,.4)">
+        <span style="font-family:'Archivo Black',sans-serif;font-size:38px;line-height:1;color:#FFF6E8;transform:rotate(-12deg)">₿</span>
+      </div>
+      <img src="assets/wordmark-light.png" alt="Bitcoin Amantikir" style="height:52px;display:block" />
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 18px;border-radius:999px;background:rgba(83,252,24,.12);border:1px solid rgba(83,252,24,.4)">
+      <span style="width:11px;height:11px;border-radius:50%;background:#53FC18;animation:livePulse 1.6s ease-in-out infinite"></span>
+      <span style="font-size:17px;font-weight:800;letter-spacing:.16em;color:#8DFF5C">AO VIVO</span>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <div style="display:flex;align-items:stretch;gap:14px">
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:5px;padding:12px 22px;border-radius:16px;background:rgba(6,32,27,.72);border:1px solid rgba(246,240,229,.12)">
+        <span style="font-size:13px;font-weight:700;letter-spacing:.18em;color:rgba(246,240,229,.5)">ÚLTIMO BLOCO</span>
+        <div style="display:flex;align-items:baseline;gap:12px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:#F5911F">#{{ blockHeight }}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:17px;color:rgba(246,240,229,.6)">{{ blockTime }}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:5px;padding:12px 22px;border-radius:16px;background:rgba(6,32,27,.72);border:1px solid rgba(246,240,229,.12)">
+        <span style="font-size:13px;font-weight:700;letter-spacing:.18em;color:rgba(246,240,229,.5)">BTC / USD</span>
+        <div style="display:flex;align-items:baseline;gap:10px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:#F6F0E5">{{ price }}</span>
+          <span style="font-size:17px;font-weight:800;color:#53FC18">{{ priceDelta }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIDDLE -->
+  <div style="position:relative;flex:1;display:flex;gap:22px;min-height:0">
+
+    <!-- LEFT RAIL -->
+    <div style="width:368px;flex:none;display:flex;flex-direction:column;gap:18px">
+      <div style="flex:1;display:flex;flex-direction:column;gap:14px;padding:24px;border-radius:24px;background:linear-gradient(180deg, rgba(11,46,40,.92), rgba(6,32,27,.92));border:1px solid rgba(246,240,229,.1)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="width:26px;height:3px;background:#F5911F;border-radius:2px"></span>
+          <span style="font-size:15px;font-weight:800;letter-spacing:.2em;color:rgba(246,240,229,.62)">NOSSOS NÚMEROS</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:16px;padding:18px 18px;border-radius:18px;background:rgba(246,240,229,.055);border-left:4px solid #F5911F">
+            <span style="font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.9;color:#F5911F">152</span>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:21px;font-weight:700">Empresas</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#8DFF5C">!mapa</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;padding:18px 18px;border-radius:18px;background:rgba(246,240,229,.055);border-left:4px solid #F5911F">
+            <span style="font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.9;color:#F5911F">5</span>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:21px;font-weight:700">Top Rank Global</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:rgba(246,240,229,.55)">adoção bitcoin</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;padding:18px 18px;border-radius:18px;background:rgba(246,240,229,.055);border-left:4px solid #F5911F">
+            <span style="font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.9;color:#F5911F">1</span>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:21px;font-weight:700">Projeto social</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#8DFF5C">!social</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex:1"></div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid rgba(246,240,229,.1)">
+          <span style="font-size:15px;font-weight:800;letter-spacing:.14em;color:rgba(246,240,229,.5)">NA TELA AGORA</span>
+          <span style="font-size:24px;font-weight:700;line-height:1.2;text-wrap:pretty">O que é Bitcoin? — escassez, transparência e soberania</span>
+        </div>
+      </div>
+
+      <div style="flex:none;display:flex;gap:16px;align-items:center;padding:18px;border-radius:22px;background:rgba(6,32,27,.85);border:1px solid rgba(246,240,229,.1)">
+        <div style="width:104px;height:104px;flex:none;border-radius:12px;background:#F6F0E5;padding:6px;box-sizing:border-box">
+          <img src="assets/qr.png" alt="QR bitcoinamantikir.org" style="width:100%;height:100%;object-fit:cover;display:block" />
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+          <span style="font-size:17px;font-weight:800;letter-spacing:.04em;color:#F6F0E5">bitcoinamantikir.org</span>
+          <span style="font-size:13px;font-weight:700;letter-spacing:.18em;color:rgba(246,240,229,.45)">APOIO</span>
+          <div style="display:flex;align-items:center;gap:12px">
+            <img src="assets/paystand.png" alt="paystand.org" style="height:26px;border-radius:5px;display:block" />
+            <img src="assets/fbi.png" alt="Fundación Bitcoin Iberoamérica" style="height:38px;width:38px;border-radius:50%;display:block" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE -->
+    <div style="flex:1;min-width:0;position:relative;border-radius:26px;overflow:hidden;background:#04120F;border:1px solid rgba(245,145,31,.35);box-shadow:0 24px 60px rgba(0,0,0,.45)">
+      <image-slot id="stage" shape="rect" placeholder="Área da transmissão / tela compartilhada"></image-slot>
+
+      <div style="position:absolute;top:18px;left:18px;width:40px;height:40px;border-top:3px solid #F5911F;border-left:3px solid #F5911F;border-radius:6px 0 0 0;pointer-events:none"></div>
+      <div style="position:absolute;top:18px;right:18px;width:40px;height:40px;border-top:3px solid #F5911F;border-right:3px solid #F5911F;border-radius:0 6px 0 0;pointer-events:none"></div>
+      <div style="position:absolute;bottom:18px;left:18px;width:40px;height:40px;border-bottom:3px solid #F5911F;border-left:3px solid #F5911F;border-radius:0 0 0 6px;pointer-events:none"></div>
+      <div style="position:absolute;bottom:18px;right:18px;width:40px;height:40px;border-bottom:3px solid #F5911F;border-right:3px solid #F5911F;border-radius:0 0 6px 0;pointer-events:none"></div>
+
+      <div style="position:absolute;bottom:20px;right:20px;width:296px;height:168px;border-radius:18px;overflow:hidden;border:2px solid rgba(246,240,229,.28);box-shadow:0 14px 34px rgba(0,0,0,.5);background:#06201B">
+        <image-slot id="cam" shape="rect" placeholder="Câmera"></image-slot>
+        <span style="position:absolute;left:12px;bottom:10px;padding:4px 12px;border-radius:999px;background:rgba(4,18,15,.72);font-size:15px;font-weight:700;letter-spacing:.06em;pointer-events:none">Luis Molina</span>
+      </div>
+
+      <div style="position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:0 340px 26px 24px;pointer-events:none">
+        <span style="max-width:820px;padding:12px 26px;border-radius:14px;background:rgba(4,18,15,.82);border:1px solid rgba(246,240,229,.12);font-size:30px;font-weight:600;line-height:1.25;text-align:center;text-wrap:pretty">{{ caption }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div style="position:relative;flex:none;display:flex;align-items:center;gap:28px;height:104px;padding:0 30px;box-sizing:border-box;border-radius:24px;background:linear-gradient(90deg, rgba(11,46,40,.95), rgba(6,32,27,.92));border:1px solid rgba(246,240,229,.1)">
+    <div style="display:flex;flex-direction:column;gap:4px;flex:none">
+      <span style="font-size:14px;font-weight:800;letter-spacing:.2em;color:rgba(246,240,229,.5)">META DE ASSINANTES</span>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-family:'Archivo Black',sans-serif;font-size:34px;line-height:1;color:#F5911F">{{ subs }}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:20px;color:rgba(246,240,229,.55)">/ {{ goal }}</span>
+      </div>
+    </div>
+
+    <div style="flex:1;height:20px;border-radius:999px;background:rgba(4,18,15,.7);border:1px solid rgba(246,240,229,.12);overflow:hidden">
+      <div style="height:100%;border-radius:999px;background:linear-gradient(90deg,#F5911F,#53FC18);box-shadow:0 0 22px rgba(83,252,24,.35);width:{{ pct }}"></div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:20px;flex:none">
+      <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
+        <span style="font-size:14px;font-weight:800;letter-spacing:.16em;color:rgba(246,240,229,.5)">COMANDOS</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:19px;color:#8DFF5C">!mapa · !social · !doar</span>
+      </div>
+      <span style="width:1px;height:52px;background:rgba(246,240,229,.14)"></span>
+      <img src="assets/wordmark-light.png" alt="" style="height:38px;opacity:.85;display:block" />
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1920,&quot;height&quot;:1080},&quot;subs&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:96,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:0,&quot;max&quot;:250,&quot;section&quot;:&quot;Meta&quot;},&quot;goal&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:250,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:10,&quot;max&quot;:1000,&quot;section&quot;:&quot;Meta&quot;},&quot;price&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;77.078,5&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;priceDelta&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;+2,4%&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;blockHeight&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;963.721&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;blockTime&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;09:17:30&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;caption&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;já falei, se ele é descentralizado, a rede não depende de ninguém&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() {
+    this.fetchLiveData();
+    this._liveTimer = setInterval(() => this.fetchLiveData(), 60000);
+  }
+  componentWillUnmount() {
+    if (this._liveTimer) clearInterval(this._liveTimer);
+  }
+  async fetchLiveData() {
+    try {
+      const [blocks, priceData] = await Promise.all([
+        fetch('https://mempool.space/api/blocks').then((r) => (r.ok ? r.json() : null)),
+        fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usdt').then((r) => (r.ok ? r.json() : null))
+      ]);
+
+      const latest = Array.isArray(blocks) ? blocks[0] : null;
+      const next = {};
+
+      if (latest && typeof latest.height === 'number') {
+        next.blockHeight = latest.height.toLocaleString('pt-BR');
+      }
+      if (latest && typeof latest.timestamp === 'number') {
+        next.blockTime = new Date(latest.timestamp * 1000).toLocaleTimeString('pt-BR', {
+          timeZone: 'America/Sao_Paulo',
+          hour12: false
+        });
+      }
+
+      const usdt = priceData && priceData.bitcoin && priceData.bitcoin.usdt;
+      if (typeof usdt === 'number') {
+        next.price = usdt.toLocaleString('pt-BR', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1
+        });
+      }
+
+      if (Object.keys(next).length) this.setState(next);
+    } catch (e) {
+      console.error('[Amantikir Overlay] falha ao atualizar dados ao vivo:', e);
+    }
+  }
+  renderVals() {
+    const p = this.props;
+    const s = this.state || {};
+    const subs = p.subs ?? 96, goal = p.goal ?? 250;
+    return {
+      subs, goal,
+      pct: Math.max(2, Math.min(100, Math.round((subs / goal) * 100))) + '%',
+      blockHeight: s.blockHeight ?? p.blockHeight ?? '963.721',
+      blockTime: s.blockTime ?? p.blockTime ?? '09:17:30',
+      price: s.price ?? p.price ?? '77.078,5',
+      priceDelta: p.priceDelta ?? '+2,4%',
+      caption: p.caption ?? 'já falei, se ele é descentralizado, a rede não depende de ninguém'
+    };
+  }
+}
+
+</script>
+</body>
+</html>

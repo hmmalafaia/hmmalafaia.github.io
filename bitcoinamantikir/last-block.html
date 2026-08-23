@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Último Bloco Bitcoin - Mempool</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      /* Fundo bege/creme da imagem */
+      background-color: #f1e9d2;
+      color: #1a2321;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* Container compacto para economizar espaço */
+    .container {
+      width: fit-content;
+      max-width: 360px;
+    }
+
+    .card {
+      /* Estilo dos cards pretos arredondados do lado esquerdo da imagem */
+      background: #1c1a17;
+      border: 2px solid #2d3e38; /* Verde escuro do tema */
+      border-radius: 16px;
+      padding: 12px 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .header {
+      border-bottom: 1px solid #322e28;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 0.85rem;
+      color: #e5dac1; /* Texto creme claro */
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .loading, .error {
+      text-align: center;
+      padding: 10px;
+      font-size: 0.85rem;
+      color: #b8ac96;
+    }
+
+    .error {
+      color: #e76f51;
+    }
+
+    .block-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Espaçamento reduzido ao máximo na horizontal */
+      gap: 12px;
+      background-color: #12110f;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid #e7801a; /* Laranja da marca Bitcoin Amantikir */
+    }
+
+    .block-height {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #f29100; /* Laranja do Bitcoin */
+      white-space: nowrap;
+    }
+
+    .block-height span {
+      color: #8c8272;
+      font-weight: 500;
+      font-size: 0.8rem;
+      margin-right: 2px;
+    }
+
+    .block-time {
+      font-size: 0.85rem;
+      color: #d1c5ad;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <h1>Último Bloco Minerado</h1>
+      </div>
+      
+      <div id="content">
+        <div class="loading">Carregando...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchLastBlock() {
+      const contentEl = document.getElementById('content');
+      
+      try {
+        // 1. Obtém a altura do último bloco (LAST_BLOCK)
+        const tipResponse = await fetch('https://mempool.space/api/blocks/tip/height');
+        if (!tipResponse.ok) throw new Error('Erro na altura.');
+        const lastBlockHeight = (await tipResponse.text()).trim();
+
+        // 2. Obtém a HASH a partir da altura
+        const hashResponse = await fetch(`https://mempool.space/api/block-height/${lastBlockHeight}`);
+        if (!hashResponse.ok) throw new Error('Erro na hash.');
+        const blockHash = (await hashResponse.text()).trim();
+
+        // 3. Obtém os detalhes completos a partir da HASH
+        const blockResponse = await fetch(`https://mempool.space/api/block/${blockHash}`);
+        if (!blockResponse.ok) throw new Error('Erro nos detalhes.');
+        const blockData = await blockResponse.json();
+
+        // Renderiza no HTML
+        contentEl.innerHTML = `
+          <div class="block-item">
+            <div class="block-height">
+              <span>#</span>${blockData.height}
+            </div>
+            <div class="block-time">
+              ${formatTimestampGmtMinus3(blockData.timestamp)}
+            </div>
+          </div>
+        `;
+
+      } catch (err) {
+        contentEl.innerHTML = `<div class="error">Falha ao carregar dados</div>`;
+      }
+    }
+
+    function formatTimestampGmtMinus3(timestamp) {
+      if (!timestamp || isNaN(timestamp)) return 'Indisponível';
+
+      const date = new Date(timestamp * 1000);
+
+      const options = {
+        timeZone: 'America/Sao_Paulo',
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      };
+
+      const formatter = new Intl.DateTimeFormat('pt-BR', options);
+      return formatter.format(date).replace(',', '');
+    }
+
+    fetchLastBlock();
+  </script>
+</body>
+</html>

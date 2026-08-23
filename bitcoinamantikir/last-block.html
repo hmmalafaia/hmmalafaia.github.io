@@ -13,7 +13,6 @@
     }
 
     body {
-      /* Fundo bege/creme da imagem */
       background-color: #f1e9d2;
       color: #1a2321;
       min-height: 100vh;
@@ -23,16 +22,14 @@
       padding: 20px;
     }
 
-    /* Container compacto para economizar espaço */
     .container {
       width: fit-content;
       max-width: 360px;
     }
 
     .card {
-      /* Estilo dos cards pretos arredondados do lado esquerdo da imagem */
       background: #1c1a17;
-      border: 2px solid #2d3e38; /* Verde escuro do tema */
+      border: 2px solid #2d3e38;
       border-radius: 16px;
       padding: 12px 16px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
@@ -47,7 +44,7 @@
 
     .header h1 {
       font-size: 0.85rem;
-      color: #e5dac1; /* Texto creme claro */
+      color: #e5dac1;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -68,18 +65,17 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      /* Espaçamento reduzido ao máximo na horizontal */
       gap: 12px;
       background-color: #12110f;
       padding: 8px 14px;
       border-radius: 8px;
-      border: 1px solid #e7801a; /* Laranja da marca Bitcoin Amantikir */
+      border: 1px solid #e7801a;
     }
 
     .block-height {
       font-weight: 800;
       font-size: 1.1rem;
-      color: #f29100; /* Laranja do Bitcoin */
+      color: #f29100;
       white-space: nowrap;
     }
 
@@ -113,26 +109,37 @@
   </div>
 
   <script>
+    // Guarda a altura do bloco atualmente exibido na interface
+    let currentBlockHeight = null;
+
     async function fetchLastBlock() {
       const contentEl = document.getElementById('content');
       
       try {
-        // 1. Obtém a altura do último bloco (LAST_BLOCK)
+        // 1. Obtém a altura do último bloco
         const tipResponse = await fetch('https://mempool.space/api/blocks/tip/height');
         if (!tipResponse.ok) throw new Error('Erro na altura.');
         const lastBlockHeight = (await tipResponse.text()).trim();
+
+        // Se a informação não mudou, interrompe a execução em background silenciosamente
+        if (lastBlockHeight === currentBlockHeight) {
+          return;
+        }
 
         // 2. Obtém a HASH a partir da altura
         const hashResponse = await fetch(`https://mempool.space/api/block-height/${lastBlockHeight}`);
         if (!hashResponse.ok) throw new Error('Erro na hash.');
         const blockHash = (await hashResponse.text()).trim();
 
-        // 3. Obtém os detalhes completos a partir da HASH
+        // 3. Obtém os detalhes completos
         const blockResponse = await fetch(`https://mempool.space/api/block/${blockHash}`);
         if (!blockResponse.ok) throw new Error('Erro nos detalhes.');
         const blockData = await blockResponse.json();
 
-        // Renderiza no HTML
+        // Atualiza a variável com a nova altura
+        currentBlockHeight = lastBlockHeight;
+
+        // Atualiza a interface
         contentEl.innerHTML = `
           <div class="block-item">
             <div class="block-height">
@@ -145,7 +152,10 @@
         `;
 
       } catch (err) {
-        contentEl.innerHTML = `<div class="error">Falha ao carregar dados</div>`;
+        // Só exibe a mensagem de erro se ainda não houver nenhum bloco na tela
+        if (!currentBlockHeight) {
+          contentEl.innerHTML = `<div class="error">Falha ao carregar dados</div>`;
+        }
       }
     }
 
@@ -169,7 +179,11 @@
       return formatter.format(date).replace(',', '');
     }
 
+    // Execução inicial
     fetchLastBlock();
+
+    // Atualização automática em background a cada 30 segundos (30000 ms)
+    setInterval(fetchLastBlock, 30000);
   </script>
 </body>
 </html>

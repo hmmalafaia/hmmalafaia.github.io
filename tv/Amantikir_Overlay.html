@@ -177,37 +177,38 @@ class Component extends DCLogic {
   }
   async fetchLiveData() {
     try {
-      const [blocks, priceData] = await Promise.all([
-        fetch('https://mempool.space/api/blocks').then((r) => (r.ok ? r.json() : null)),
-        fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usdt').then((r) => (r.ok ? r.json() : null))
-      ]);
+        const [blocks, priceData] = await Promise.all([
+            fetch('https://mempool.space/api/blocks').then((r) => (r.ok ? r.json() : null)),
+            fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true').then((r) => (r.ok ? r.json() : null))
+        ]);
 
-      const latest = Array.isArray(blocks) ? blocks[0] : null;
-      const next = {};
+        const latest = Array.isArray(blocks) ? blocks[0] : null;
+        const next = {};
 
-      if (latest && typeof latest.height === 'number') {
-        next.blockHeight = latest.height.toLocaleString('pt-BR');
-      }
-      if (latest && typeof latest.timestamp === 'number') {
-        next.blockTime = new Date(latest.timestamp * 1000).toLocaleTimeString('pt-BR', {
-          timeZone: 'America/Sao_Paulo',
-          hour12: false
-        });
-      }
+        if (latest && typeof latest.height === 'number') {
+            next.blockHeight = latest.height.toLocaleString('pt-BR');
+        }
+        if (latest && typeof latest.timestamp === 'number') {
+            next.blockTime = new Date(latest.timestamp * 1000).toLocaleTimeString('pt-BR', {
+                timeZone: 'America/Sao_Paulo',
+                hour12: false
+            });
+        }
 
-      const usdt = priceData && priceData.bitcoin && priceData.bitcoin.usdt;
-      if (typeof usdt === 'number') {
-        next.price = usdt.toLocaleString('pt-BR', {
-          minimumFractionDigits: 1,
-          maximumFractionDigits: 1
-        });
-      }
+        const btc = priceData && priceData.bitcoin;
+        if (btc && typeof btc.usd === 'number') {
+            next.price = btc.usd.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        }
+        if (btc && typeof btc.usd_24h_change === 'number') {
+            const change = btc.usd_24h_change;
+            next.priceDelta = `${change >= 0 ? '+' : ''}${change.toFixed(1).replace('.', ',')}%`;
+        }
 
-      if (Object.keys(next).length) this.setState(next);
+        if (Object.keys(next).length) this.setState(next);
     } catch (e) {
-      console.error('[Amantikir Overlay] falha ao atualizar dados ao vivo:', e);
+        console.error('[Amantikir Overlay] falha ao atualizar dados ao vivo:', e);
     }
-  }
+}
   renderVals() {
     const p = this.props;
     const s = this.state || {};
@@ -218,7 +219,7 @@ class Component extends DCLogic {
       blockHeight: s.blockHeight ?? p.blockHeight ?? '963.721',
       blockTime: s.blockTime ?? p.blockTime ?? '09:17:30',
       price: s.price ?? p.price ?? '77.078,5',
-      priceDelta: p.priceDelta ?? '+2,4%',
+      priceDelta: s.priceDelta ?? p.priceDelta ?? '+2,4%',
       caption: p.caption ?? ''
     };
   }

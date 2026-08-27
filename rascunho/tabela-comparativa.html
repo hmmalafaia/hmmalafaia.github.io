@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matriz de Custódia de Bitcoin | Educação Real</title>
+    <style>
+        :root {
+            --primary-orange: #F7931A; /* Laranja Bitcoin */
+            --light-orange: #fcefdc;
+            --primary-green: #4CAF50;
+            --light-green: #e6f4e7;
+            --primary-yellow: #FFC107;
+            --light-yellow: #fff8e1;
+            --bg-color: #faf9f6;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --border-color: #e0e0e0;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            color: var(--primary-orange);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+            border-bottom: 3px solid var(--light-green);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .card {
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 40px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th, td {
+            padding: 15px 12px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--light-yellow);
+            color: #555;
+            font-weight: 600;
+            font-size: 0.9rem;
+            position: sticky;
+            top: 0;
+            cursor: help;
+        }
+
+        /* Tooltip style para cabeçalhos */
+        th[title] {
+            text-decoration: underline dotted var(--primary-yellow);
+        }
+
+        td:first-child, th:first-child {
+            text-align: left;
+            position: sticky;
+            left: 0;
+            background-color: var(--white);
+            font-weight: 600;
+            color: var(--text-main);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+            z-index: 2;
+        }
+        
+        th:first-child {
+            background-color: var(--light-yellow);
+            z-index: 3;
+        }
+
+        tbody tr:hover td {
+            background-color: var(--light-orange);
+        }
+        
+        tbody tr:hover td:first-child {
+            background-color: var(--light-orange);
+        }
+
+        /* Cores baseadas nos scores (1 a 5) */
+        .score-1 { color: #d32f2f; font-weight: bold; } /* Ruim / Alto Risco */
+        .score-2 { color: #f57c00; font-weight: bold; }
+        .score-3 { color: #fbc02d; font-weight: bold; } /* Neutro */
+        .score-4 { color: #7cb342; font-weight: bold; }
+        .score-5 { color: #388e3c; font-weight: bold; } /* Bom / Baixo Risco */
+
+        /* Tabela 2 (Setups) */
+        .setup-table th {
+            background-color: var(--light-green);
+        }
+        .setup-table th[title] {
+            text-decoration: underline dotted var(--primary-green);
+        }
+
+        /* Legenda */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .dot {
+            width: 12px; height: 12px; border-radius: 50%;
+        }
+
+        /* Descrições expansíveis */
+        .definitions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .def-box {
+            background-color: var(--white);
+            border-left: 4px solid var(--primary-orange);
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        .def-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--primary-orange);
+        }
+        .def-box p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Matriz de Custódia de Bitcoin</h1>
+        <p class="subtitle">Avaliação comparativa dos diferentes cenários de custódia e setups fundamentais, focada em segurança, usabilidade e soberania.</p>
+    </header>
+
+    <h2 class="section-title">Definição dos Cenários de Custódia</h2>
+    <div class="definitions">
+        <div class="def-box">
+            <h3>Exchange (Corretora)</h3>
+            <p>Plataforma centralizada. A empresa detém as chaves privadas. Você visualiza o saldo, mas não possui o controle direto na blockchain.</p>
+        </div>
+        <div class="def-box">
+            <h3>Carteira Lightning</h3>
+            <p>Ideal para microtransações. A custódia pode ser de terceiros ou depender de um servidor externo (ex: Coinomi, Muun).</p>
+        </div>
+        <div class="def-box">
+            <h3>Carteira Online On-chain</h3>
+            <p>Hot wallet conectada à internet (ex: BlueWallet). As chaves ficam no seu dispositivo, oferecendo controle direto, mas com exposição à rede.</p>
+        </div>
+        <div class="def-box">
+            <h3>Dispositivo Offline (BlueWallet)</h3>
+            <p>Uso de um aparelho secundário (smartphone antigo) sem internet para assinar transações. Cria um ambiente isolado.</p>
+        </div>
+        <div class="def-box">
+            <h3>Hardware Wallet Conectada</h3>
+            <p>Dispositivo físico dedicado (ex: Trezor). Isolamento alto, mas requer conexão temporária via cabo USB para transacionar.</p>
+        </div>
+        <div class="def-box">
+            <h3>Hardware Wallet Air-gapped</h3>
+            <p>Segurança máxima (ex: Coldcard). Transações assinadas sem contato digital, usando apenas cartão SD ou QR Code.</p>
+        </div>
+    </div>
+
+    <h2 class="section-title">Matriz de Cenários (Escala 1 a 5)</h2>
+    <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">Passe o mouse sobre os cabeçalhos para ver a definição de cada critério. Escala: <strong>1 = Pior / Maior Risco</strong> até <strong>5 = Melhor / Menor Risco</strong>.</p>
+    
+    <div class="card">
+        <table id="matriz-cenarios">
+            <thead>
+                <tr>
+                    <th>Cenário de Custódia</th>
+                    <th title="Facilidade de operação diária e interface do usuário">Usabilidade</th>
+                    <th title="Agilidade para enviar e receber Bitcoins">Facilidade Transf.</th>
+                    <th title="Nível de segurança contra roubos através da internet">Segurança contra Hacker</th>
+                    <th title="Proteção contra perda devido à insolvência de terceiros">Proteção contra Falência</th>
+                    <th title="Segurança contra perda por acesso físico direto ao dispositivo">Segurança Física</th>
+                    <th title="Nível de proteção contra falhas do usuário em operações">Proteção Erro Humano</th>
+                    <th title="Segurança na preservação da semente de recuperação">Segurança de Backup</th>
+                    <th title="Nível real de controle próprio sobre os fundos">Soberania</th>
+                    <th title="Grau de anonimato e desvinculação de identidade na blockchain">Privacidade</th>
+                    <th title="Facilidade de estruturar a herança dos ativos">Sucessão</th>
+                    <th title="Capacidade de exigir múltiplas assinaturas">Multifirma</th>
+                    <th title="1 = Custo Alto (Ruim) | 5 = Custo Baixo/Zero (Bom)">Custo Inicial (Benefício)</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+        
+        <div class="legend">
+            <div class="legend-item"><div class="dot" style="background: #d32f2f;"></div> 1 - Pior / Risco Crítico</div>
+            <div class="legend-item"><div class="dot" style="background: #fbc02d;"></div> 3 - Neutro / Risco Médio</div>
+            <div class="legend-item"><div class="dot" style="background: #388e3c;"></div> 5 - Melhor / Seguro</div>
+        </div>
+    </div>
+
+    <h2 class="section-title">Matriz de Setups Fundamentais</h2>
+    <div class="card">
+        <table class="setup-table" id="matriz-setups">
+            <thead>
+                <tr>
+                    <th>Setup Fundamental</th>
+                    <th title="Confiabilidade do método usado para gerar a chave">Origem da Entropia</th>
+                    <th title="Segurança de acesso ao software/dispositivo">Proteção por PIN</th>
+                    <th title="Camada adicional de senha para a seed">Passphrase (BIP39)</th>
+                    <th title="Facilidade em restaurar a carteira do zero">Complexidade de Recuperação</th>
+                    <th title="Nível de proteção contra ataques e erros">Segurança Geral</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Dados da primeira tabela
+    // Preenchendo as lacunas de forma lógica mantendo o balanço de 1 (Pior) a 5 (Melhor)
+    const cenariosData = [
+        { nome: "Exchange", valores: [5, 5, 1, 1, 4, 4, 4, 1, 1, 2, 1, 5] },
+        { nome: "Carteira Lightning", valores: [4, 4, 3, 2, 4, 4, 3, 2, 2, 2, 1, 4] },
+        { nome: "Carteira Online On-chain", valores: [4, 4, 3, 5, 3, 3, 3, 4, 3, 2, 3, 4] },
+        { nome: "Dispositivo Offline", valores: [2, 2, 5, 5, 2, 2, 4, 5, 4, 3, 4, 3] },
+        { nome: "Hardware Wallet Conectada", valores: [3, 3, 4, 5, 3, 3, 4, 5, 4, 3, 4, 2] },
+        { nome: "Hardware Wallet Air-gapped", valores: [2, 2, 5, 5, 3, 2, 4, 5, 5, 4, 5, 1] }
+    ];
+
+    // Dados da segunda tabela
+    const setupsData = [
+        { nome: "Single Key Gerada no App", valores: ["Baixa/Média (Depende do App)", "Sim (Básica)", "Opcional", "Fácil (Apenas 12/24 palavras)", "Adequada para valores baixos"] },
+        { nome: "Single Key c/ Mecânica Entropia", valores: ["Alta (Dados/Moedas físicos)", "Sim (Forte em HW)", "Recomendado", "Média (Requer cuidado extra c/ Passphrase)", "Alta para Cold Storage"] },
+        { nome: "Multisig (Multifirma)", valores: ["Múltiplas Fontes (Alta)", "Múltiplos PINs", "Complexo de gerenciar", "Difícil (Exige backups de Xpubs/Descritores)", "Extrema (Padrão Institucional)"] }
+    ];
+
+    function getScoreClass(val) {
+        if (typeof val === 'number') {
+            return `score-${val}`;
+        }
+        return '';
+    }
+
+    // Renderizar Tabela 1
+    const tbodyCenarios = document.querySelector("#matriz-cenarios tbody");
+    cenariosData.forEach(row => {
+        let tr = document.createElement("tr");
+        let tdNome = document.createElement("td");
+        tdNome.textContent = row.nome;
+        tr.appendChild(tdNome);
+
+        row.valores.forEach(val => {
+            let td = document.createElement("td");
+            td.textContent = val;
+            td.className = getScoreClass(val);
+            tr.appendChild(td);
+        });
+        tbodyCenarios.appendChild(tr);
+    });
+
+    // Renderizar Tabela 2
+    const tbodySetups = document.querySelector("#matriz-setups tbody");
+    setupsData.forEach(row => {
+        let tr = document.createElement("tr");
+        let tdNome = document.createElement("td");
+        tdNome.textContent = row.nome;
+        tdNome.style.fontWeight = 'bold';
+        tr.appendChild(tdNome);
+
+        row.valores.forEach(val => {
+            let td = document.createElement("td");
+            td.textContent = val;
+            td.style.color = 'var(--text-muted)';
+            tr.appendChild(td);
+        });
+        tbodySetups.appendChild(tr);
+    });
+</script>
+
+</body>
+</html>

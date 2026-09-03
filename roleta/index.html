@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BLJGSX12JN"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-BLJGSX12JN');
+    </script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roleta de Sorteio</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-hover: #45a049;
+            --bg: #f4f7f6;
+            --panel-bg: #ffffff;
+            --text: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Campo de Título / Prêmio */
+        .header-title {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 25px;
+        }
+
+        .header-title input {
+            width: 100%;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            border: 3px dashed #ccc;
+            border-radius: 12px;
+            background-color: transparent;
+            color: var(--text);
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .header-title input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: var(--panel-bg);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            border-style: solid;
+        }
+
+        .header-title input::placeholder {
+            color: #aaa;
+            font-weight: normal;
+            font-size: 2rem;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+            flex: 1;
+            min-width: 320px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        /* Controles da Esquerda */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            resize: vertical;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: inherit;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+        }
+
+        .input-group input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+            text-transform: uppercase;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            background-color: #9e9e9e;
+            cursor: not-allowed;
+        }
+
+        /* Área da Roleta */
+        .wheel-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto;
+        }
+
+        canvas {
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            transform: rotate(0deg); /* Controlado via JS */
+        }
+
+        .pointer {
+            position: absolute;
+            top: 50%;
+            right: -20px;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            border-right: 35px solid #e74c3c; 
+            z-index: 10;
+            filter: drop-shadow(-2px 2px 2px rgba(0,0,0,0.2));
+        }
+
+        .center-peg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            z-index: 5;
+        }
+
+        /* Mensagem de Ganhador */
+        #winnerMessage {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 6px;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Área da Direita (Ranking) */
+        .ranking-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .ranking-list li {
+            background-color: #f8f9fa;
+            border-left: 5px solid var(--primary);
+            padding: 12px 15px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            animation: fadeIn 0.3s;
+        }
+
+        .rank-position {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header-title">
+        <input type="text" placeholder="O que está valendo na corrida? (Ex: Quem paga a pizza)" autocomplete="off">
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <h2>Configurações e Roleta</h2>
+            
+            <div class="controls">
+                <textarea id="participants" rows="6" placeholder="Cole aqui os participantes, um por linha. Ex:&#10;Alice&#10;Bruno&#10;Carlos"></textarea>
+                
+                <div class="input-group">
+                    <label for="spinTime">Tempo de giro (segundos):</label>
+                    <input type="number" id="spinTime" value="5" min="1" max="20">
+                </div>
+                
+                <button id="spinBtn">Girar Roleta</button>
+            </div>
+
+            <div id="winnerMessage"></div>
+
+            <div class="wheel-container">
+                <canvas id="wheel" width="400" height="400"></canvas>
+                <div class="center-peg"></div>
+                <div class="pointer"></div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Ranking Geral</h2>
+            <ul class="ranking-list" id="ranking">
+                </ul>
+        </div>
+    </div>
+
+    <script>
+        const textarea = document.getElementById('participants');
+        const spinBtn = document.getElementById('spinBtn');
+        const timeInput = document.getElementById('spinTime');
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const rankingList = document.getElementById('ranking');
+        const winnerMessage = document.getElementById('winnerMessage');
+
+        let participants = [];
+        let currentAngle = 0;
+        let isSpinning = false;
+        let rankCount = 1;
+        let animationFrameId;
+
+        // Gera cores amigáveis (pastel/vivas) para a roleta
+        function getSliceColor(index, total) {
+            const hue = index * (360 / total);
+            return `hsl(${hue}, 70%, 55%)`;
+        }
+
+        // Lê o textarea e atualiza o array de participantes
+        function updateParticipants() {
+            if (isSpinning) return;
+            const lines = textarea.value.split('\n');
+            participants = lines.map(l => l.trim()).filter(l => l !== '');
+            drawWheel();
+        }
+
+        // Desenha a roleta no Canvas
+        function drawWheel() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = centerX;
+
+            if (participants.length === 0) {
+                // Roleta vazia
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#e0e0e0';
+                ctx.fill();
+                ctx.fillStyle = '#666';
+                ctx.font = '18px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('Adicione participantes', centerX, centerY);
+                return;
+            }
+
+            const arcAngle = (2 * Math.PI) / participants.length;
+
+            for (let i = 0; i < participants.length; i++) {
+                const angle = currentAngle + i * arcAngle;
+                
+                // Desenha a fatia
+                ctx.beginPath();
+                ctx.fillStyle = getSliceColor(i, participants.length);
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, angle, angle + arcAngle);
+                ctx.fill();
+                
+                // Linha de separação branca
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                // Desenha o texto
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angle + arcAngle / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 16px 'Segoe UI', Arial, sans-serif";
+                
+                // Limita o tamanho do texto para caber na fatia
+                let text = participants[i];
+                if (text.length > 18) {
+                    text = text.substring(0, 15) + '...';
+                }
+                
+                // Sombra no texto para melhor leitura
+                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                ctx.shadowBlur = 4;
+                
+                ctx.fillText(text, radius - 15, 6);
+                ctx.restore();
+            }
+        }
+
+        // Função de Easing Circular (inicia rápido, reduz a velocidade gradualmente)
+        function easeOutCirc(x) {
+            return Math.sqrt(1 - Math.pow(x - 1, 2));
+        }
+
+        // Inicia o giro
+        spinBtn.addEventListener('click', () => {
+            if (participants.length === 0) {
+                alert('Por favor, cole os participantes antes de girar.');
+                return;
+            }
+            if (isSpinning) return;
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            textarea.disabled = true;
+            winnerMessage.style.display = 'none';
+
+            const durationInSeconds = parseFloat(timeInput.value) || 5;
+            const duration = durationInSeconds * 1000;
+            const startAngle = currentAngle;
+            
+            // Gira de 5 a 10 vezes completas + um deslocamento aleatório
+            const randomOffset = Math.random() * Math.PI * 2;
+            const totalRotation = (5 + Math.random() * 5) * Math.PI * 2 + randomOffset;
+
+            let startTime = null;
+
+            function animateSpin(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = timestamp - startTime;
+                let percent = progress / duration;
+
+                if (percent >= 1) percent = 1;
+
+                const ease = easeOutCirc(percent);
+                currentAngle = startAngle + (totalRotation * ease);
+                
+                drawWheel();
+
+                if (percent < 1) {
+                    animationFrameId = requestAnimationFrame(animateSpin);
+                } else {
+                    finishSpin();
+                }
+            }
+
+            requestAnimationFrame(animateSpin);
+        });
+
+        // Finaliza o giro e determina o vencedor
+        function finishSpin() {
+            isSpinning = false;
+            spinBtn.disabled = false;
+            textarea.disabled = false;
+
+            // Mantém o ângulo atual entre 0 e 2 PI
+            currentAngle = currentAngle % (2 * Math.PI);
+            
+            const arcAngle = (2 * Math.PI) / participants.length;
+
+            // O ponteiro visualmente está posicionado no 0 graus (direita do canvas).
+            // A fatia sob o ponteiro é calculada invertendo o ângulo atual.
+            const invertedAngle = (2 * Math.PI - currentAngle) % (2 * Math.PI);
+            const winnerIndex = Math.floor(invertedAngle / arcAngle);
+            const winnerName = participants[winnerIndex];
+
+            // 1. Exibir Mensagem
+            winnerMessage.innerHTML = `🎉 Vencedor: <strong>${winnerName}</strong>! 🎉`;
+            winnerMessage.style.display = 'block';
+
+            // 2. Adicionar ao Ranking
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="rank-position">${rankCount}º Lugar</span> <span>${winnerName}</span>`;
+            rankingList.appendChild(li);
+            rankCount++;
+
+            // 3. Remover o vencedor da lista para não ganhar novamente
+            participants.splice(winnerIndex, 1);
+            textarea.value = participants.join('\n');
+            
+            // Redesenhar a roleta com os participantes restantes
+            drawWheel();
+        }
+
+        // Listener para sincronizar alterações no textarea na roleta imediatamente
+        textarea.addEventListener('input', updateParticipants);
+
+        // Inicializa o desenho vazio da roleta
+        updateParticipants();
+
+    </script>
+</body>
+</html>

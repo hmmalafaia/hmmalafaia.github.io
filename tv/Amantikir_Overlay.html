@@ -197,8 +197,8 @@ class Component extends DCLogic {
 
         const btc = priceData && priceData.bitcoin;
         if (btc && typeof btc.usd === 'number') {
-            next.price = btc.usd.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-        }
+    next.price = btc.usd.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+}
         if (btc && typeof btc.usd_24h_change === 'number') {
             const change = btc.usd_24h_change;
             next.priceDelta = `${change >= 0 ? '+' : ''}${change.toFixed(1).replace('.', ',')}%`;

@@ -213,10 +213,10 @@ class Component extends DCLogic {
     return {
       subs, goal,
       pct: Math.max(2, Math.min(100, Math.round((subs / goal) * 100))) + '%',
-      blockHeight: s.blockHeight ?? p.blockHeight ?? '963.721',
-      blockTime: s.blockTime ?? p.blockTime ?? '09:17:30',
-      price: s.price ?? p.price ?? '77.078,5',
-      priceDelta: s.priceDelta ?? p.priceDelta ?? '+2,4%',
+      blockHeight: s.blockHeight ?? p.blockHeight ?? '0',
+      blockTime: s.blockTime ?? p.blockTime ?? '0',
+      price: s.price ?? p.price ?? '0',
+      priceDelta: s.priceDelta ?? p.priceDelta ?? '0',
       caption: p.caption ?? ''
     };
   }

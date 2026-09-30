@@ -38,9 +38,6 @@ nome=Host
     <div style="position:absolute;inset:0;opacity:.5;background:repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 2px, rgba(0,0,0,0) 2px 4px);pointer-events:none"></div>
     <div style="position:absolute;left:0;right:0;bottom:0;height:180px;background:#0d1815;clip-path:polygon(0 100%,0 62%,9% 30%,17% 58%,27% 14%,38% 55%,47% 33%,58% 66%,69% 22%,79% 57%,88% 35%,100% 68%,100% 100%);opacity:.55;pointer-events:none"></div>
 
-    <!-- Iframe oculto para carregar e atualizar o Botrix dinamicamente -->
-    <iframe id="botrix-frame" src="{{ botrixUrl }}" style="display:none;" aria-hidden="true"></iframe>
-
     <!-- TOP BAR -->
     <div style="position:relative;display:flex;align-items:center;gap:24px;height:88px;flex:none">
         <div style="display:flex;align-items:center;gap:16px;padding:0 24px 0 0">
@@ -173,18 +170,18 @@ nome=Host
 class Component extends DCLogic {
     componentDidMount() {
         this.fetchLiveData();
-        this._liveTimer = setInterval(() => this.fetchLiveData(), 30000); // Atualiza dados e assinantes a cada 30 segundos
+        this._liveTimer = setInterval(() => this.fetchLiveData(), 30000);
     }
     componentWillUnmount() {
         if (this._liveTimer) clearInterval(this._liveTimer);
     }
     async fetchLiveData() {
         try {
-            const [blockRes, priceData, botrixData] = await Promise.all([
+            const [blockRes, priceData, botrixRes] = await Promise.all([
                 fetch('https://mempool.space/api/blocks/tip/height', { mode: 'cors' }).then((r) => (r.ok ? r.text() : null)).catch(() => null),
                 fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', { mode: 'cors' }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-                // Faz fetch na URL do Botrix via proxy amigável de CORS ou requisição direta para raspar os dados se possível
-                fetch(document.getElementById('botrix-frame').src, { mode: 'no-cors' }).then(() => true).catch(() => false)
+                // Requisição direta à API de dados do Botrix baseada no BID informado
+                fetch('https://botrix.live/api/widget/goal?bid=ht93ieghLLxkaE7gufIm3Q', { mode: 'cors' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
             ]);
 
             const next = {};
@@ -212,20 +209,10 @@ class Component extends DCLogic {
                 next.priceDelta = '+0,2%';
             }
 
-            // Tenta ler os números do widget do Botrix embutido no iframe oculto
-            try {
-                const iframe = document.getElementById('botrix-frame');
-                if (iframe && iframe.contentDocument) {
-                    const textContent = iframe.contentDocument.body.innerText;
-                    // Procura por números no formato "atual / meta" ou extrai dígitos relevantes
-                    const matches = textContent.match(/\d+/g);
-                    if (matches && matches.length >= 2) {
-                        next.dynamicSubs = matches[0];
-                        next.dynamicGoal = matches[1];
-                    }
-                }
-            } catch (err) {
-                // Bloqueio de cross-origin do iframe do Botrix tratada silenciosamente
+            // Extrai os valores reais retornados pela API do Botrix
+            if (botrixRes) {
+                if (botrixRes.current !== undefined) next.dynamicSubs = botrixRes.current;
+                if (botrixRes.target !== undefined) next.dynamicGoal = botrixRes.target;
             }
 
             this.setState(next);
@@ -244,12 +231,7 @@ class Component extends DCLogic {
         const s = this.state || {};
         
         const urlParams = new URLSearchParams(window.location.search);
-        
-        // URL do Botrix parametrizada (com o link padrão fornecido)
-        const defaultBotrix = "https://botrix.live/widgets/goals/followers/?bid=ht93ieghLLxkaE7gufIm3Q&platform=youtube&goalId=followers-youtube&mode=total&theme=cleanradius&targetValue=250&rank=1&fontFamily=Arial&fontSize=32&fillColor=%23e87215&textColor=%23ffffff&message=ASSINANTES&align=center";
-        const botrixUrl = urlParams.get('botrix') || defaultBotrix;
 
-        // Subs e Goal (prioriza o dado dinâmico coletado, senão usa os parâmetros da URL / props)
         const subs = s.dynamicSubs ?? urlParams.get('subs') ?? p.subs ?? 96;
         const goal = s.dynamicGoal ?? urlParams.get('goal') ?? p.goal ?? 250;
 
@@ -260,7 +242,7 @@ class Component extends DCLogic {
         const rankGlobal = urlParams.get('rank') || '5';
         const quantidadeSocial = urlParams.get('social') || '1';
 
-        const speakerName = urlParams.get('nome') || 'Host';
+        const speakerName = urlParams.get('nome') || 'Luis Molina';
 
         const isLive = urlParams.get('live') !== 'false';
         const badgeText = isLive ? 'AO VIVO' : 'GRAVADO';
@@ -269,7 +251,6 @@ class Component extends DCLogic {
         const badgeBorder = isLive ? 'rgba(83,252,24,.4)' : 'rgba(255,165,0,.4)';
 
         return {
-            botrixUrl,
             subs,
             goal,
             pct: Math.max(2, Math.min(100, Math.round((Number(subs) / Number(goal)) * 100))) + '%',

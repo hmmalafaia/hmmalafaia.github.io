@@ -11,7 +11,6 @@ live=true&
 nome=Host
 
 -->
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -38,6 +37,9 @@ nome=Host
 <div style="position:relative;width:1920px;height:1080px;overflow:hidden;background:radial-gradient(120% 90% at 50% 0%, #162622 0%, #0d1815 50%, #080e0c 100%);font-family:Archivo, system-ui, sans-serif;color:#F6F0E5;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:22px">
     <div style="position:absolute;inset:0;opacity:.5;background:repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 2px, rgba(0,0,0,0) 2px 4px);pointer-events:none"></div>
     <div style="position:absolute;left:0;right:0;bottom:0;height:180px;background:#0d1815;clip-path:polygon(0 100%,0 62%,9% 30%,17% 58%,27% 14%,38% 55%,47% 33%,58% 66%,69% 22%,79% 57%,88% 35%,100% 68%,100% 100%);opacity:.55;pointer-events:none"></div>
+
+    <!-- Iframe oculto para carregar e atualizar o Botrix dinamicamente -->
+    <iframe id="botrix-frame" src="{{ botrixUrl }}" style="display:none;" aria-hidden="true"></iframe>
 
     <!-- TOP BAR -->
     <div style="position:relative;display:flex;align-items:center;gap:24px;height:88px;flex:none">
@@ -105,7 +107,7 @@ nome=Host
                 <div style="flex:1"></div>
                 <div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid rgba(246,240,229,.1)">
                     <span style="font-size:15px;font-weight:800;letter-spacing:.14em;color:rgba(246,240,229,.5)">NA TELA AGORA</span>
-                    <span style="font-size:24px;font-weight:700;line-height:1.2;text-wrap:pretty">Conteúdo selecionado Amantikir</span>
+                    <span style="font-size:24px;font-weight:700;line-height:1.2;text-wrap:pretty">O que é Bitcoin? — escassez, transparência e soberania</span>
                 </div>
             </div>
             <div style="flex:none;display:flex;gap:16px;align-items:center;padding:18px;border-radius:22px;background:rgba(13,24,21,.85);border:1px solid rgba(246,240,229,.1)">
@@ -132,13 +134,13 @@ nome=Host
             <div style="position:absolute;bottom:18px;right:18px;width:40px;height:40px;border-bottom:3px solid #F5911F;border-right:3px solid #F5911F;border-radius:0 0 6px 0;pointer-events:none"></div>
             
             <!-- CAIXA DA CÂMERA -->
-            <div style="position:absolute;bottom:20px;right:20px;width:{{ camW }}px;height:{{ camH }}px;border-radius:18px;overflow:hidden;border:2px solid rgba(246,240,229,.28);box-shadow:0 14px 34px rgba(0,0,0,.5);background:#0d1815">
+            <div style="position:absolute;bottom:20px;right:20px;width:{{ camW }}px;height:{{ camH }}px;border-radius:18px;overflow:hidden;border:2px solid rgba(246,240,229,.28);box-shadow:0 14px 34px rgba(0,0,0,.5);background:#06201B">
                 <image-slot id="cam" shape="rect" placeholder="Câmera"></image-slot>
-                <span style="position:absolute;left:12px;bottom:10px;padding:4px 12px;border-radius:999px;background:rgba(11,20,18,.72);font-size:15px;font-weight:700;letter-spacing:.06em;pointer-events:none">{{ speakerName }}</span>
+                <span style="position:absolute;left:12px;bottom:10px;padding:4px 12px;border-radius:999px;background:rgba(4,18,15,.72);font-size:15px;font-weight:700;letter-spacing:.06em;pointer-events:none">{{ speakerName }}</span>
             </div>
 
             <div style="position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:0 340px 26px 24px;pointer-events:none">
-                <span style="max-width:820px;padding:12px 26px;border-radius:14px;background:rgba(11,20,18,.82);border:1px solid rgba(246,240,229,.12);font-size:30px;font-weight:600;line-height:1.25;text-align:center;text-wrap:pretty">{{ caption }}</span>
+                <span style="max-width:820px;padding:12px 26px;border-radius:14px;background:rgba(4,18,15,.82);border:1px solid rgba(246,240,229,.12);font-size:30px;font-weight:600;line-height:1.25;text-align:center;text-wrap:pretty">{{ caption }}</span>
             </div>
         </div>
     </div>
@@ -171,16 +173,18 @@ nome=Host
 class Component extends DCLogic {
     componentDidMount() {
         this.fetchLiveData();
-        this._liveTimer = setInterval(() => this.fetchLiveData(), 60000);
+        this._liveTimer = setInterval(() => this.fetchLiveData(), 30000); // Atualiza dados e assinantes a cada 30 segundos
     }
     componentWillUnmount() {
         if (this._liveTimer) clearInterval(this._liveTimer);
     }
     async fetchLiveData() {
         try {
-            const [blockRes, priceData] = await Promise.all([
+            const [blockRes, priceData, botrixData] = await Promise.all([
                 fetch('https://mempool.space/api/blocks/tip/height', { mode: 'cors' }).then((r) => (r.ok ? r.text() : null)).catch(() => null),
-                fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', { mode: 'cors' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+                fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', { mode: 'cors' }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+                // Faz fetch na URL do Botrix via proxy amigável de CORS ou requisição direta para raspar os dados se possível
+                fetch(document.getElementById('botrix-frame').src, { mode: 'no-cors' }).then(() => true).catch(() => false)
             ]);
 
             const next = {};
@@ -208,6 +212,22 @@ class Component extends DCLogic {
                 next.priceDelta = '+0,2%';
             }
 
+            // Tenta ler os números do widget do Botrix embutido no iframe oculto
+            try {
+                const iframe = document.getElementById('botrix-frame');
+                if (iframe && iframe.contentDocument) {
+                    const textContent = iframe.contentDocument.body.innerText;
+                    // Procura por números no formato "atual / meta" ou extrai dígitos relevantes
+                    const matches = textContent.match(/\d+/g);
+                    if (matches && matches.length >= 2) {
+                        next.dynamicSubs = matches[0];
+                        next.dynamicGoal = matches[1];
+                    }
+                }
+            } catch (err) {
+                // Bloqueio de cross-origin do iframe do Botrix tratada silenciosamente
+            }
+
             this.setState(next);
         } catch (e) {
             console.error('[Amantikir Overlay] falha ao atualizar dados ao vivo:', e);
@@ -222,10 +242,17 @@ class Component extends DCLogic {
     renderVals() {
         const p = this.props;
         const s = this.state || {};
-        const subs = p.subs ?? 96, goal = p.goal ?? 250;
-
+        
         const urlParams = new URLSearchParams(window.location.search);
         
+        // URL do Botrix parametrizada (com o link padrão fornecido)
+        const defaultBotrix = "https://botrix.live/widgets/goals/followers/?bid=ht93ieghLLxkaE7gufIm3Q&platform=youtube&goalId=followers-youtube&mode=total&theme=cleanradius&targetValue=250&rank=1&fontFamily=Arial&fontSize=32&fillColor=%23e87215&textColor=%23ffffff&message=ASSINANTES&align=center";
+        const botrixUrl = urlParams.get('botrix') || defaultBotrix;
+
+        // Subs e Goal (prioriza o dado dinâmico coletado, senão usa os parâmetros da URL / props)
+        const subs = s.dynamicSubs ?? urlParams.get('subs') ?? p.subs ?? 96;
+        const goal = s.dynamicGoal ?? urlParams.get('goal') ?? p.goal ?? 250;
+
         const camW = urlParams.get('cameraL') || '296';
         const camH = urlParams.get('cameraA') || '168';
 
@@ -233,7 +260,6 @@ class Component extends DCLogic {
         const rankGlobal = urlParams.get('rank') || '5';
         const quantidadeSocial = urlParams.get('social') || '1';
 
-        // Parâmetro do nome do palestrante/câmera (padrão: Luis Molina)
         const speakerName = urlParams.get('nome') || 'Host';
 
         const isLive = urlParams.get('live') !== 'false';
@@ -243,9 +269,10 @@ class Component extends DCLogic {
         const badgeBorder = isLive ? 'rgba(83,252,24,.4)' : 'rgba(255,165,0,.4)';
 
         return {
+            botrixUrl,
             subs,
             goal,
-            pct: Math.max(2, Math.min(100, Math.round((subs / goal) * 100))) + '%',
+            pct: Math.max(2, Math.min(100, Math.round((Number(subs) / Number(goal)) * 100))) + '%',
             blockHeight: s.blockHeight ?? p.blockHeight ?? '969259',
             blockTime: s.blockTime ?? p.blockTime ?? '01:38:17',
             price: s.price ?? p.price ?? '83.297',

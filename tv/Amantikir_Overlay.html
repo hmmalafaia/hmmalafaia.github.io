@@ -1,8 +1,12 @@
-<!DOCTYPE html>
 <!-- {URL}/tv/Amantikir_Overlay.html?
              empresas=180&
              rank=3&social=2
-             &cameraL=320&cameraA=180 -->
+             &cameraL=320&cameraA=180 
+             &live=false
+              
+
+            -->
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -37,9 +41,9 @@
             </div>
             <img src="assets/wordmark-light.png" alt="Bitcoin Amantikir" style="height:52px;display:block" />
         </div>
-        <div style="display:flex;align-items:center;gap:10px;padding:9px 18px;border-radius:999px;background:rgba(83,252,24,.12);border:1px solid rgba(83,252,24,.4)">
-            <span style="width:11px;height:11px;border-radius:50%;background:#53FC18;animation:livePulse 1.6s ease-in-out infinite"></span>
-            <span style="font-size:17px;font-weight:800;letter-spacing:.16em;color:#8DFF5C">AO VIVO</span>
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 18px;border-radius:999px;background:{{ badgeBg }};border:1px solid {{ badgeBorder }}">
+            <span style="width:11px;height:11px;border-radius:50%;background:{{ badgeColor }};animation:livePulse 1.6s ease-in-out infinite"></span>
+            <span style="font-size:17px;font-weight:800;letter-spacing:.16em;color:{{ badgeColor }}">{{ badgeText }}</span>
         </div>
         <div style="flex:1"></div>
         <div style="display:flex;align-items:stretch;gap:14px">
@@ -217,14 +221,21 @@ class Component extends DCLogic {
         // Lê os parâmetros da URL
         const urlParams = new URLSearchParams(window.location.search);
         
-        // Parâmetros da câmera (com fallbacks padrão)
+        // Parâmetros da câmera
         const camW = urlParams.get('cameraL') || '296';
         const camH = urlParams.get('cameraA') || '168';
 
-        // Parâmetros dos números estatísticos (com fallbacks para os valores fixos atuais)
+        // Parâmetros dos números estatísticos
         const quantidadeEmpresas = urlParams.get('empresas') || '152';
         const rankGlobal = urlParams.get('rank') || '5';
         const quantidadeSocial = urlParams.get('social') || '1';
+
+        // Parâmetro do status Live / Gravado
+        const isLive = urlParams.get('live') !== 'false';
+        const badgeText = isLive ? 'AO VIVO' : 'GRAVADO';
+        const badgeColor = isLive ? '#8DFF5C' : '#FFA500';
+        const badgeBg = isLive ? 'rgba(83,252,24,.12)' : 'rgba(255,165,0,.12)';
+        const badgeBorder = isLive ? 'rgba(83,252,24,.4)' : 'rgba(255,165,0,.4)';
 
         return {
             subs,
@@ -239,7 +250,11 @@ class Component extends DCLogic {
             camH,
             quantidadeEmpresas,
             rankGlobal,
-            quantidadeSocial
+            quantidadeSocial,
+            badgeText,
+            badgeColor,
+            badgeBg,
+            badgeBorder
         };
     }
 }

@@ -142,18 +142,8 @@ nome=Host
         </div>
     </div>
 
-    <!-- BOTTOM BAR -->
-    <div style="position:relative;flex:none;display:flex;align-items:center;gap:28px;height:104px;padding:0 30px;box-sizing:border-box;border-radius:24px;background:linear-gradient(90deg, rgba(22,38,34,.95), rgba(13,24,21,.92));border:1px solid rgba(246,240,229,.1)">
-        <div style="display:flex;flex-direction:column;gap:4px;flex:none">
-            <span style="font-size:14px;font-weight:800;letter-spacing:.2em;color:rgba(246,240,229,.5)">META DE ASSINANTES</span>
-            <div style="display:flex;align-items:baseline;gap:8px">
-                <span style="font-family:'Archivo Black',sans-serif;font-size:34px;line-height:1;color:#F5911F">{{ subs }}</span>
-                <span style="font-family:'JetBrains Mono',monospace;font-size:20px;color:rgba(246,240,229,.55)">/ {{ goal }}</span>
-            </div>
-        </div>
-        <div style="flex:1;height:20px;border-radius:999px;background:rgba(11,20,18,.7);border:1px solid rgba(246,240,229,.12);overflow:hidden">
-            <div style="height:100%;border-radius:999px;background:linear-gradient(90deg,#F5911F,#53FC18);box-shadow:0 0 22px rgba(83,252,24,.35);width:{{ pct }}"></div>
-        </div>
+    <!-- BOTTOM BAR (Área livre para o widget do Botrix no OBS) -->
+    <div style="position:relative;flex:none;display:flex;align-items:center;justify-content:flex-end;gap:28px;height:104px;padding:0 30px;box-sizing:border-box;border-radius:24px;background:linear-gradient(90deg, rgba(22,38,34,.95), rgba(13,24,21,.92));border:1px solid rgba(246,240,229,.1)">
         <div style="display:flex;align-items:center;gap:20px;flex:none">
             <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
                 <span style="font-size:14px;font-weight:800;letter-spacing:.16em;color:rgba(246,240,229,.5)">COMANDOS</span>
@@ -166,7 +156,7 @@ nome=Host
 </div>
 </x-dc>
 
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1920,&quot;height&quot;:1080},&quot;subs&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:96,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:0,&quot;max&quot;:250,&quot;section&quot;:&quot;Meta&quot;},&quot;goal&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:250,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:10,&quot;max&quot;:1000,&quot;section&quot;:&quot;Meta&quot;},&quot;price&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;0&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;priceDelta&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;0%&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;blockHeight&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;0&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;blockTime&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;00:00:00&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;caption&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1920,&quot;height&quot;:1080},&quot;price&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;0&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;priceDelta&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;0%&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;blockHeight&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;0&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;blockTime&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;00:00:00&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;},&quot;caption&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Dados ao vivo&quot;}}">
 class Component extends DCLogic {
     componentDidMount() {
         this.fetchLiveData();
@@ -177,11 +167,9 @@ class Component extends DCLogic {
     }
     async fetchLiveData() {
         try {
-            const [blockRes, priceData, botrixRes] = await Promise.all([
+            const [blockRes, priceData] = await Promise.all([
                 fetch('https://mempool.space/api/blocks/tip/height', { mode: 'cors' }).then((r) => (r.ok ? r.text() : null)).catch(() => null),
-                fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', { mode: 'cors' }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-                // Requisição direta à API de dados do Botrix baseada no BID informado
-                fetch('https://botrix.live/api/widget/goal?bid=ht93ieghLLxkaE7gufIm3Q', { mode: 'cors' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+                fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', { mode: 'cors' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
             ]);
 
             const next = {};
@@ -209,12 +197,6 @@ class Component extends DCLogic {
                 next.priceDelta = '+0,2%';
             }
 
-            // Extrai os valores reais retornados pela API do Botrix
-            if (botrixRes) {
-                if (botrixRes.current !== undefined) next.dynamicSubs = botrixRes.current;
-                if (botrixRes.target !== undefined) next.dynamicGoal = botrixRes.target;
-            }
-
             this.setState(next);
         } catch (e) {
             console.error('[Amantikir Overlay] falha ao atualizar dados ao vivo:', e);
@@ -232,9 +214,6 @@ class Component extends DCLogic {
         
         const urlParams = new URLSearchParams(window.location.search);
 
-        const subs = s.dynamicSubs ?? urlParams.get('subs') ?? p.subs ?? 96;
-        const goal = s.dynamicGoal ?? urlParams.get('goal') ?? p.goal ?? 250;
-
         const camW = urlParams.get('cameraL') || '296';
         const camH = urlParams.get('cameraA') || '168';
 
@@ -251,9 +230,6 @@ class Component extends DCLogic {
         const badgeBorder = isLive ? 'rgba(83,252,24,.4)' : 'rgba(255,165,0,.4)';
 
         return {
-            subs,
-            goal,
-            pct: Math.max(2, Math.min(100, Math.round((Number(subs) / Number(goal)) * 100))) + '%',
             blockHeight: s.blockHeight ?? p.blockHeight ?? '969259',
             blockTime: s.blockTime ?? p.blockTime ?? '01:38:17',
             price: s.price ?? p.price ?? '83.297',
@@ -274,4 +250,5 @@ class Component extends DCLogic {
 }
 </script>
 </body>
+</html>
 </html>

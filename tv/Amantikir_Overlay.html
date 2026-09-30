@@ -1,9 +1,8 @@
 <!DOCTYPE html>
- <!-- {URL}/tv/Amantikir_Overlay.html?
+<!-- {URL}/tv/Amantikir_Overlay.html?
              empresas=180&
              rank=3&social=2
              &cameraL=320&cameraA=180 -->
-
 <html>
 <head>
     <meta charset="utf-8">
@@ -13,7 +12,7 @@
 <body>
 <x-dc>
 <helmet>
-    <title>overlay-20260930-v1</title>
+    <title>overlay</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Archivo+Black&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
@@ -72,21 +71,21 @@
                 </div>
                 <div style="display:flex;flex-direction:column;gap:12px">
                     <div style="display:flex;align-items:center;gap:16px;padding:18px 18px;border-radius:18px;background:rgba(246,240,229,.055);border-left:4px solid #F5911F">
-                        <span style="font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.9;color:#F5911F">152</span>
+                        <span style="font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.9;color:#F5911F">{{ quantidadeEmpresas }}</span>
                         <div style="display:flex;flex-direction:column;gap:5px">
                             <span style="font-size:21px;font-weight:700">Empresas</span>
                             <span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#8DFF5C">!mapa</span>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:16px;padding:18px 18px;border-radius:18px;background:rgba(246,240,229,.055);border-left:4px solid #F5911F">
-                        <span style="font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.9;color:#F5911F">5</span>
+                        <span style="font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.9;color:#F5911F">{{ rankGlobal }}</span>
                         <div style="display:flex;flex-direction:column;gap:5px">
                             <span style="font-size:21px;font-weight:700">Top Rank Global</span>
                             <span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:rgba(246,240,229,.55)">adoção bitcoin</span>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:16px;padding:18px 18px;border-radius:18px;background:rgba(246,240,229,.055);border-left:4px solid #F5911F">
-                        <span style="font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.9;color:#F5911F">1</span>
+                        <span style="font-family:'Archivo Black',sans-serif;font-size:46px;line-height:.9;color:#F5911F">{{ quantidadeSocial }}</span>
                         <div style="display:flex;flex-direction:column;gap:5px">
                             <span style="font-size:21px;font-weight:700">Projeto social</span>
                             <span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#8DFF5C">!social</span>
@@ -122,7 +121,7 @@
             <div style="position:absolute;bottom:18px;left:18px;width:40px;height:40px;border-bottom:3px solid #F5911F;border-left:3px solid #F5911F;border-radius:0 0 0 6px;pointer-events:none"></div>
             <div style="position:absolute;bottom:18px;right:18px;width:40px;height:40px;border-bottom:3px solid #F5911F;border-right:3px solid #F5911F;border-radius:0 0 6px 0;pointer-events:none"></div>
             
-            <!-- CAIXA DA CÂMERA (Com tamanho dinâmico via URL ou padrão nativo) -->
+            <!-- CAIXA DA CÂMERA -->
             <div style="position:absolute;bottom:20px;right:20px;width:{{ camW }}px;height:{{ camH }}px;border-radius:18px;overflow:hidden;border:2px solid rgba(246,240,229,.28);box-shadow:0 14px 34px rgba(0,0,0,.5);background:#06201B">
                 <image-slot id="cam" shape="rect" placeholder="Câmera"></image-slot>
                 <span style="position:absolute;left:12px;bottom:10px;padding:4px 12px;border-radius:999px;background:rgba(4,18,15,.72);font-size:15px;font-weight:700;letter-spacing:.06em;pointer-events:none">Luis Molina</span>
@@ -215,11 +214,17 @@ class Component extends DCLogic {
         const s = this.state || {};
         const subs = p.subs ?? 96, goal = p.goal ?? 250;
 
-        // Lê os parâmetros da URL para a câmera (com fallback para os tamanhos padrão: Largura 296, Altura 168)
-        //?cameraL=300&cameraA=150
+        // Lê os parâmetros da URL
         const urlParams = new URLSearchParams(window.location.search);
+        
+        // Parâmetros da câmera (com fallbacks padrão)
         const camW = urlParams.get('cameraL') || '296';
         const camH = urlParams.get('cameraA') || '168';
+
+        // Parâmetros dos números estatísticos (com fallbacks para os valores fixos atuais)
+        const quantidadeEmpresas = urlParams.get('empresas') || '152';
+        const rankGlobal = urlParams.get('rank') || '5';
+        const quantidadeSocial = urlParams.get('social') || '1';
 
         return {
             subs,
@@ -231,7 +236,10 @@ class Component extends DCLogic {
             priceDelta: s.priceDelta ?? p.priceDelta ?? '0%',
             caption: p.caption ?? '',
             camW,
-            camH
+            camH,
+            quantidadeEmpresas,
+            rankGlobal,
+            quantidadeSocial
         };
     }
 }

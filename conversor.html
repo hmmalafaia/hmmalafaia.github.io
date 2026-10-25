@@ -1,0 +1,229 @@
+<title>Conversor BRL · ARS · USD · sats</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: uma coluna estreita — quatro linhas de moeda empilhadas, painel de cotações abaixo */
+:root{
+  --bg:#eef1f0; --surface:#ffffff; --ink:#14201d; --muted:#5d6b67; --line:#d3dbd8;
+  --accent:#c9741a; --accent-soft:#f6e6d3; --focus:#0f6b5c;
+  --display:"Instrument Sans", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1514; --surface:#18201e; --ink:#e7eeec; --muted:#91a19c; --line:#2a3633;
+  --accent:#f0a24c; --accent-soft:#3a2a17; --focus:#5cc7b2; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --surface:#18201e; --ink:#e7eeec; --muted:#91a19c; --line:#2a3633;
+  --accent:#f0a24c; --accent-soft:#3a2a17; --focus:#5cc7b2; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:15px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:32px 48px}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+header h1{margin:0;font-size:1.6rem;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:4px 0 0;color:var(--muted)}
+
+.board{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:grid;grid-template-columns:64px 1fr;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid var(--line);transition:background .15s}
+.row:first-child{border-top:0}
+.row.active{background:var(--accent-soft)}
+.code{display:flex;flex-direction:column;line-height:1.15}
+.code b{font-family:var(--mono);font-weight:500;font-size:1rem;letter-spacing:.04em}
+.code span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.field{display:flex;align-items:baseline;gap:6px;min-width:0}
+.field .sym{font-family:var(--mono);color:var(--muted);font-size:1.1rem}
+.field input{flex:1;min-width:0;width:100%;border:0;background:transparent;color:var(--ink);
+  font-family:var(--mono);font-size:1.45rem;font-variant-numeric:tabular-nums;text-align:right;padding:4px 0;outline:none}
+.field input::placeholder{color:var(--line)}
+.row:focus-within{box-shadow:inset 3px 0 0 var(--focus)}
+.row.btc .code b{color:var(--accent)}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;font-weight:600;font-size:.88rem;border-radius:8px;padding:8px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+button:hover{border-color:var(--muted)}
+button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.rates h2{margin:0 0 4px;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.rates .note{margin:0 0 12px;font-size:.85rem;color:var(--muted)}
+.rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:460px){.rgrid{grid-template-columns:1fr}}
+.rgrid label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--muted);min-width:0}
+.rgrid input{font-family:var(--mono);font-size:.95rem;font-variant-numeric:tabular-nums;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+.rgrid input:focus{outline:2px solid var(--focus);outline-offset:-1px;border-color:transparent}
+.derived{margin-top:12px;font-family:var(--mono);font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+#status{font-size:.85rem;color:var(--muted);min-height:1.3em}
+@media (prefers-reduced-motion:reduce){.row{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Conversor de moedas</h1>
+    <p>Digite em qualquer campo. Os outros se atualizam na hora.</p>
+  </header>
+
+  <div class="board" id="board">
+    <div class="row" data-cur="BRL">
+      <div class="code"><b>BRL</b><span>Real</span></div>
+      <div class="field"><span class="sym">R$</span><input id="in-BRL" inputmode="decimal" autocomplete="off" aria-label="Real" placeholder="0,00"></div>
+    </div>
+    <div class="row" data-cur="ARS">
+      <div class="code"><b>ARS</b><span>Peso arg.</span></div>
+      <div class="field"><span class="sym">$</span><input id="in-ARS" inputmode="decimal" autocomplete="off" aria-label="Peso argentino" placeholder="0,00"></div>
+    </div>
+    <div class="row" data-cur="USD">
+      <div class="code"><b>USD</b><span>Dólar</span></div>
+      <div class="field"><span class="sym">US$</span><input id="in-USD" inputmode="decimal" autocomplete="off" aria-label="Dólar americano" placeholder="0,00"></div>
+    </div>
+    <div class="row btc" data-cur="SAT">
+      <div class="code"><b>SAT</b><span>Satoshis</span></div>
+      <div class="field"><span class="sym">丰</span><input id="in-SAT" inputmode="numeric" autocomplete="off" aria-label="Satoshis" placeholder="0"></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="btn-live" type="button">Buscar cotações online</button>
+    <button id="btn-clear" type="button">Limpar</button>
+  </div>
+  <div id="status" role="status"></div>
+
+  <section class="rates">
+    <h2>Cotações usadas</h2>
+    <p class="note" id="rate-note">Valores de exemplo. Ajuste aqui ou use o botão acima.</p>
+    <div class="rgrid">
+      <label for="r-btc">1 BTC em US$<input id="r-btc" inputmode="decimal" autocomplete="off"></label>
+      <label for="r-brl">1 US$ em R$<input id="r-brl" inputmode="decimal" autocomplete="off"></label>
+      <label for="r-ars">1 US$ em ARS<input id="r-ars" inputmode="decimal" autocomplete="off"></label>
+    </div>
+    <div class="derived" id="derived"></div>
+  </section>
+</div>
+
+<script>
+(function(){
+  const DEFAULTS = { btc: 110000, brl: 5.40, ars: 1450 };
+  const KEY = 'conv-rates-v1';
+  let rates = Object.assign({}, DEFAULTS);
+  let note = 'Valores de exemplo. Ajuste aqui ou use o botão acima.';
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.btc && s.brl && s.ars) { rates = s; note = s.note || 'Cotações salvas neste navegador.'; } } catch(e){}
+
+  const CUR = ['BRL','ARS','USD','SAT'];
+  const inp = Object.fromEntries(CUR.map(c => [c, document.getElementById('in-'+c)]));
+  const rIn = { btc: document.getElementById('r-btc'), brl: document.getElementById('r-brl'), ars: document.getElementById('r-ars') };
+  const statusEl = document.getElementById('status');
+  let lastCur = 'BRL', lastUsd = null;
+
+  // Aceita "1.234,56", "1,234.56", "1234,56", "1234.56"
+  function parse(str, integer){
+    if (str == null) return NaN;
+    let s = String(str).trim().replace(/[\s'_]/g,'');
+    if (!s) return NaN;
+    if (integer) { s = s.replace(/[^\d]/g,''); return s ? Number(s) : NaN; }
+    s = s.replace(/[^\d.,-]/g,'');
+    const lc = s.lastIndexOf(','), ld = s.lastIndexOf('.');
+    if (lc > -1 && ld > -1) {
+      if (lc > ld) s = s.replace(/\./g,'').replace(',', '.');
+      else s = s.replace(/,/g,'');
+    } else if (lc > -1) {
+      s = (s.split(',').length > 2) ? s.replace(/,/g,'') : s.replace(',', '.');
+    } else if (ld > -1 && s.split('.').length > 2) {
+      s = s.replace(/\./g,'');
+    }
+    const n = Number(s);
+    return isFinite(n) ? n : NaN;
+  }
+
+  const money = v => v.toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2});
+  const fmt = {
+    BRL: money,
+    ARS: money,
+    USD: money,
+    SAT: v => Math.round(v).toLocaleString('pt-BR',{maximumFractionDigits:0})
+  };
+  const usdPer = {
+    BRL: () => 1/rates.brl,
+    ARS: () => 1/rates.ars,
+    USD: () => 1,
+    SAT: () => rates.btc/1e8
+  };
+
+  function render(skip){
+    CUR.forEach(c => {
+      if (c === skip) return;
+      inp[c].value = (lastUsd == null) ? '' : fmt[c](lastUsd / usdPer[c]());
+    });
+  }
+  function setActive(c){
+    document.querySelectorAll('.row').forEach(r => r.classList.toggle('active', r.dataset.cur === c));
+  }
+
+  CUR.forEach(c => {
+    inp[c].addEventListener('input', () => {
+      const v = parse(inp[c].value, c === 'SAT');
+      lastCur = c; setActive(c);
+      lastUsd = isNaN(v) ? null : v * usdPer[c]();
+      render(c);
+    });
+    inp[c].addEventListener('blur', () => {
+      const v = parse(inp[c].value, c === 'SAT');
+      if (!isNaN(v)) inp[c].value = fmt[c](v);
+    });
+    inp[c].addEventListener('focus', () => inp[c].select());
+  });
+
+  function showRates(){
+    rIn.btc.value = money(rates.btc);
+    rIn.brl.value = money(rates.brl);
+    rIn.ars.value = money(rates.ars);
+    document.getElementById('rate-note').textContent = note;
+    const brlPerSat = rates.btc*rates.brl/1e8, arsPerSat = rates.btc*rates.ars/1e8;
+    const fine = v => v.toLocaleString('pt-BR',{minimumFractionDigits:4, maximumFractionDigits:4});
+    document.getElementById('derived').innerHTML =
+      '1 R$ = ' + money(rates.ars/rates.brl) + ' ARS' +
+      '<br>1 sat = R$ ' + fine(brlPerSat) + ' · ARS ' + fine(arsPerSat) +
+      '<br>1 BTC = R$ ' + money(rates.btc*rates.brl);
+  }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(Object.assign({note}, rates))); } catch(e){} }
+  function recompute(){
+    if (lastUsd == null) return;
+    const v = parse(inp[lastCur].value, lastCur === 'SAT');
+    if (!isNaN(v)) { lastUsd = v * usdPer[lastCur](); render(lastCur); }
+  }
+
+  Object.keys(rIn).forEach(k => {
+    rIn[k].addEventListener('input', () => {
+      const v = parse(rIn[k].value);
+      if (v > 0) { rates[k] = v; note = 'Cotações ajustadas manualmente.'; document.getElementById('rate-note').textContent = note; save(); recompute(); }
+    });
+    rIn[k].addEventListener('blur', showRates);
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    lastUsd = null; CUR.forEach(c => inp[c].value = ''); setActive(null); inp.BRL.focus();
+  });
+
+  document.getElementById('btn-live').addEventListener('click', async () => {
+    statusEl.textContent = 'Buscando…';
+    try {
+      const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 8000);
+      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,brl,ars', {signal: ctl.signal});
+      clearTimeout(t);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json(); const b = j.bitcoin;
+      if (!b || !b.usd || !b.brl || !b.ars) throw new Error('resposta incompleta');
+      rates = { btc: b.usd, brl: b.brl / b.usd, ars: b.ars / b.usd };
+      const now = new Date();
+      note = 'CoinGecko, ' + now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) + '. ARS pela taxa de mercado do BTC.';
+      save(); showRates(); recompute();
+      statusEl.textContent = 'Cotações atualizadas.';
+    } catch(e) {
+      statusEl.textContent = 'Não consegui buscar online (a página pode estar sem acesso à internet). Ajuste as cotações à mão abaixo.';
+    }
+  });
+
+  showRates();
+  // Exemplo inicial
+  inp.BRL.value = fmt.BRL(100); lastCur = 'BRL'; lastUsd = 100 * usdPer.BRL(); render('BRL'); setActive('BRL');
+})();
+</script>
